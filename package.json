@@ -29,6 +29,12 @@
         {
           "case": "camelCase"
         }
+      ],
+      "camelcase": [
+        "error",
+        {
+          "properties": "never"
+        }
       ]
     }
   },
@@ -51,6 +57,8 @@
     "dotenv-safe": "^6.0.0",
     "express": "^4.16.3",
     "fast-xml-parser": "^3.11.1",
+    "googleapis": "^32.0.0",
+    "mongoose": "^5.2.4",
     "pubsubhubbub": "^0.4.1",
     "telegraf": "^3.21.2"
   }
