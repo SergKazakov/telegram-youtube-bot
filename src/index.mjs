@@ -58,7 +58,9 @@ import { subscribeToYoutubeChannel } from "./pubsubhubbub/subscribeToYoutubeChan
   })
 
   bot.command("subscribe", getUser, async ctx => {
-    oauth2Client.setCredentials(ctx.state.user.tokens)
+    oauth2Client.setCredentials({
+      refresh_token: ctx.state.user.refreshToken,
+    })
 
     const youtube = googleapis.google.youtube({
       version: "v3",
@@ -133,7 +135,11 @@ import { subscribeToYoutubeChannel } from "./pubsubhubbub/subscribeToYoutubeChan
       const user = await User.findOne({ userId })
 
       if (!user) {
-        await User.create({ userId, chatId, tokens })
+        await User.create({
+          userId,
+          chatId,
+          refreshToken: tokens.refresh_token,
+        })
       }
 
       await bot.telegram.sendMessage(chatId, "Success login")

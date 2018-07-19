@@ -5,7 +5,7 @@ const schema = new mongoose.Schema(
     userId: { type: Number, required: true },
     chatId: { type: Number, required: true },
     channels: { type: [String], default: [] },
-    tokens: Object,
+    refreshToken: String,
   },
   { timestamps: true },
 )
