@@ -71,17 +71,12 @@ import { subscribeToYoutubeChannel } from "./pubsubhubbub/subscribeToYoutubeChan
 
     do {
       // eslint-disable-next-line no-await-in-loop
-      const { data } = await util.promisify(cb =>
-        youtube.subscriptions.list(
-          {
-            mine: true,
-            maxResults: 10,
-            part: "snippet",
-            ...(nextPage && { pageToken: nextPage }),
-          },
-          cb,
-        ),
-      )()
+      const { data } = await youtube.subscriptions.list({
+        mine: true,
+        maxResults: 50,
+        part: "snippet",
+        ...(nextPage && { pageToken: nextPage }),
+      })
 
       channels.push(
         ...data.items.map(({ snippet }) => snippet.resourceId.channelId),
