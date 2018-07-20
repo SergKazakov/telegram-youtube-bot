@@ -6,6 +6,7 @@ import pubsubhubbub from "pubsubhubbub"
 import googleapis from "googleapis"
 import mongoose from "mongoose"
 import xmlParser from "fast-xml-parser"
+import SocksAgent from "socks5-https-client/lib/Agent"
 import { User } from "./models/user"
 import { subscribeToYoutubeChannel } from "./pubsubhubbub/subscribeToYoutubeChannel"
 ;(async () => {
@@ -15,7 +16,16 @@ import { subscribeToYoutubeChannel } from "./pubsubhubbub/subscribeToYoutubeChan
     process.env.GOOGLE_REDIRECT_URL,
   )
 
-  const bot = new Telegraf(process.env.BOT_TOKEN)
+  const bot = new Telegraf(process.env.BOT_TOKEN, {
+    ...(process.env.NODE_ENV !== "production" && {
+      telegram: {
+        agent: new SocksAgent({
+          socksHost: process.env.SOCKS5_HOST,
+          socksPort: process.env.SOCKS5_PORT,
+        }),
+      },
+    }),
+  })
 
   bot
     .use(async (ctx, next) => {
