@@ -61,5 +61,8 @@
     "mongoose": "^5.2.4",
     "pubsubhubbub": "^0.4.1",
     "telegraf": "^3.21.2"
+  },
+  "engines": {
+    "node": ">=10"
   }
 }
