@@ -8,11 +8,15 @@ import { server } from "./server"
 
   bot.options.username = username
 
-  await bot.telegram.deleteWebhook()
+  const webhookUrl = `${process.env.PUBLIC_URL}/${process.env.BOT_TOKEN}`
 
-  await bot.telegram.setWebhook(
-    `${process.env.PUBLIC_URL}/${process.env.BOT_TOKEN}`,
-  )
+  const { url: currentWebhookUrl } = await bot.telegram.getWebhookInfo()
+
+  if (currentWebhookUrl !== webhookUrl) {
+    await bot.telegram.deleteWebhook()
+
+    await bot.telegram.setWebhook(webhookUrl)
+  }
 
   await mongoose.connect(
     process.env.MONGODB_URL,
