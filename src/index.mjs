@@ -6,7 +6,7 @@ import pubsubhubbub from "pubsubhubbub"
 import googleapis from "googleapis"
 import mongoose from "mongoose"
 import xmlParser from "fast-xml-parser"
-import SocksAgent from "socks5-https-client/lib/Agent"
+import HttpsProxyAgent from "https-proxy-agent"
 import { User } from "./models/user"
 import { subscribeToYoutubeChannel } from "./pubsubhubbub/subscribeToYoutubeChannel"
 ;(async () => {
@@ -19,10 +19,7 @@ import { subscribeToYoutubeChannel } from "./pubsubhubbub/subscribeToYoutubeChan
   const bot = new Telegraf(process.env.BOT_TOKEN, {
     ...(process.env.NODE_ENV !== "production" && {
       telegram: {
-        agent: new SocksAgent({
-          socksHost: process.env.SOCKS5_HOST,
-          socksPort: process.env.SOCKS5_PORT,
-        }),
+        agent: new HttpsProxyAgent(process.env.PROXY_URL),
       },
     }),
   })
@@ -105,22 +102,36 @@ import { subscribeToYoutubeChannel } from "./pubsubhubbub/subscribeToYoutubeChan
   })
 
   pubsub.on("feed", async ({ topic, feed }) => {
-    const [, channelId] = topic.split(
-      "https://www.youtube.com/xml/feeds/videos.xml?channel_id=",
-    )
+    try {
+      const [, channelId] = topic.split("=")
 
-    const message = xmlParser.getTraversalObj(feed.toString())
+      const message = xmlParser.parse(feed.toString(), {
+        attributeNamePrefix: "",
+        ignoreAttributes: false,
+        allowBooleanAttributes: true,
+      })
 
-    const subscribers = await User.find({
-      chatId: { $ne: null },
-      channels: channelId,
-    })
+      console.log(message)
 
-    await Promise.all(
-      subscribers.map(({ chatId }) =>
-        bot.telegram.sendMessage(chatId, message),
-      ),
-    )
+      const {
+        feed: {
+          entry: {
+            link: { href },
+          },
+        },
+      } = message
+
+      const subscribers = await User.find({
+        chatId: { $ne: null },
+        channels: channelId,
+      })
+
+      await Promise.all(
+        subscribers.map(({ chatId }) => bot.telegram.sendMessage(chatId, href)),
+      )
+    } catch (err) {
+      console.log(err)
+    }
   })
 
   await mongoose.connect(

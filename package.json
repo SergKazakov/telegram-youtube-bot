@@ -58,9 +58,9 @@
     "express": "^4.16.3",
     "fast-xml-parser": "^3.11.1",
     "googleapis": "^32.0.0",
+    "https-proxy-agent": "^2.2.1",
     "mongoose": "^5.2.4",
     "pubsubhubbub": "^0.4.1",
-    "socks5-https-client": "^1.2.1",
     "telegraf": "^3.21.2"
   },
   "engines": {
