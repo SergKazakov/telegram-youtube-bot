@@ -1,7 +1,9 @@
 export const errorHandler = async (ctx, next) => {
   try {
     await next()
-  } catch ({ message }) {
-    return ctx.reply(message)
+  } catch (err) {
+    console.log(err)
+
+    return ctx.reply("Ooops")
   }
 }
