@@ -30,5 +30,5 @@ server
 
     await bot.telegram.sendMessage(chatId, "Success login")
 
-    res.sendStatus(204)
+    res.redirect(`https://t.me/${bot.options.username}`)
   })

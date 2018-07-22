@@ -4,6 +4,10 @@ import mongoose from "mongoose"
 import { bot } from "./bot"
 import { server } from "./server"
 ;(async () => {
+  const { username } = await bot.telegram.getMe()
+
+  bot.options.username = username
+
   await bot.telegram.deleteWebhook()
 
   await bot.telegram.setWebhook(
