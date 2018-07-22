@@ -1,5 +1,5 @@
 import { getYoutubeClient } from "../google"
-import { subscribeToYoutubeChannel } from "../pubsub"
+import { emitEvent } from "../pubsub"
 import { Subscription } from "../models/subscription"
 
 export const onSubscribeCommand = async ctx => {
@@ -19,7 +19,14 @@ export const onSubscribeCommand = async ctx => {
     })
 
     channels.push(
-      ...data.items.map(({ snippet }) => snippet.resourceId.channelId),
+      ...data.items.map(
+        ({
+          snippet: {
+            title,
+            resourceId: { channelId },
+          },
+        }) => ({ channelId, title }),
+      ),
     )
 
     nextPage = data.nextPageToken
@@ -32,7 +39,7 @@ export const onSubscribeCommand = async ctx => {
   const newSubscriptions = []
 
   await Promise.all(
-    channels.map(async channelId => {
+    channels.map(async ({ channelId, ...rest }) => {
       const subscription = await Subscription.findOne({
         user: user.id,
         channelId,
@@ -42,9 +49,13 @@ export const onSubscribeCommand = async ctx => {
         return
       }
 
-      await subscribeToYoutubeChannel(channelId)
+      await emitEvent("subscribe")(channelId)
 
-      const { id } = await Subscription.create({ channelId, user: user.id })
+      const { id } = await Subscription.create({
+        channelId,
+        user: user.id,
+        ...rest,
+      })
 
       newSubscriptions.push(id)
     }),

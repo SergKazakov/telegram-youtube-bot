@@ -4,13 +4,14 @@ import mongoose from "mongoose"
 import { bot } from "./bot"
 import { server } from "./server"
 ;(async () => {
-  const { username } = await bot.telegram.getMe()
-
-  bot.options.username = username
-
   const webhookUrl = `${process.env.PUBLIC_URL}/${process.env.BOT_TOKEN}`
 
-  const { url: currentWebhookUrl } = await bot.telegram.getWebhookInfo()
+  const [{ username }, { url: currentWebhookUrl }] = await Promise.all([
+    bot.telegram.getMe(),
+    bot.telegram.getWebhookInfo(),
+  ])
+
+  bot.options.username = username
 
   if (currentWebhookUrl !== webhookUrl) {
     await bot.telegram.deleteWebhook()

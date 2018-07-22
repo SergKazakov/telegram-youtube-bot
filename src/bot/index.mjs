@@ -5,6 +5,8 @@ import { errorHandler } from "./errorHandler"
 import { authMiddleware } from "./authMiddleware"
 import { onSubscribeCommand } from "./onSubscribeCommand"
 import { onSubscriptionsCommand } from "./onSubscriptionsCommand"
+import { execAction } from "./actions/execAction"
+import { getSubscription } from "./actions/getSubscription"
 
 export const bot = new Telegraf(process.env.BOT_TOKEN, {
   ...(process.env.NODE_ENV !== "production" && {
@@ -19,3 +21,6 @@ bot
   .use(errorHandler)
   .command("subscribe", authMiddleware, onSubscribeCommand)
   .command("subscriptions", authMiddleware, onSubscriptionsCommand)
+  .action(/\/subscription (.+)/, authMiddleware, getSubscription)
+  .action(/\/subscribe (.+)/, authMiddleware, execAction("subscribe"))
+  .action(/\/unsubscribe (.+)/, authMiddleware, execAction("unsubscribe"))

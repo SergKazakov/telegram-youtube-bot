@@ -8,15 +8,11 @@ export const pubsub = pubsubhubbub.createServer({
 
 pubsub.on("feed", onFeed)
 
-const exec = command => channelId =>
+export const emitEvent = event => channelId =>
   util.promisify(cb =>
-    pubsub[command](
+    pubsub[event](
       `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${channelId}`,
       "https://pubsubhubbub.appspot.com",
       cb,
     ),
   )()
-
-export const subscribeToYoutubeChannel = exec("subscribe")
-
-export const unsubscribeFromYoutubeChannel = exec("unsubscribe")
