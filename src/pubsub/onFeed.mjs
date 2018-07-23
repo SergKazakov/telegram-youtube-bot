@@ -19,7 +19,10 @@ export const onFeed = async ({ topic, feed }) => {
       allowBooleanAttributes: true,
     })
 
-    const subscriptions = await Subscription.find({ channelId })
+    const subscriptions = await Subscription.find({
+      channelId,
+      isNotificationEnabled: true,
+    })
 
     const subscribers = await User.find({
       _id: { $in: subscriptions.map(({ user }) => user) },

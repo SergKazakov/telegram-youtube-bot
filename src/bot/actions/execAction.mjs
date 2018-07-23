@@ -1,6 +1,5 @@
 import Markup from "telegraf/markup"
 import { Subscription } from "../../models/subscription"
-import { emitEvent } from "../../pubsub"
 
 export const execAction = action => async ctx => {
   const [, id] = ctx.match
@@ -10,8 +9,6 @@ export const execAction = action => async ctx => {
   if (!subscription) {
     throw new Error("Subscription not found")
   }
-
-  await emitEvent(action)(subscription.channelId)
 
   await subscription.update({ isNotificationEnabled: action === "subscribe" })
 
