@@ -1,13 +1,25 @@
-import express from "express"
+import http from "http"
+
 import { pubsub } from "../pubsub"
 import { bot } from "../bot"
 import { oauth2Callback } from "./oauth2Callback"
-import { errorHandler } from "./errorHandler"
 
-export const server = express()
+export const server = http.createServer((req, res) => {
+  const webhookUrl = `/${process.env.BOT_TOKEN}`
 
-server
-  .use(bot.webhookCallback(`/${process.env.BOT_TOKEN}`))
-  .use("/pubsubhubbub", pubsub.listener())
-  .get("/oauth2callback", oauth2Callback)
-  .use(errorHandler)
+  if (req.url.includes(webhookUrl)) {
+    return bot.webhookCallback(webhookUrl)(req, res)
+  }
+
+  if (req.url.includes("/pubsubhubbub")) {
+    return pubsub.listener()(req, res)
+  }
+
+  if (req.method === "GET" && req.url.includes("/oauth2callback")) {
+    return oauth2Callback(req, res)
+  }
+
+  res.writeHead(404)
+
+  res.end()
+})
