@@ -49,5 +49,7 @@ export const oauth2Callback = handleError(async (req, res) => {
 
   await bot.telegram.sendMessage(chatId, "Success login")
 
-  res.redirect(`https://t.me/${bot.options.username}`)
+  const { username } = await bot.telegram.getMe()
+
+  res.redirect(`https://t.me/${username}`)
 })

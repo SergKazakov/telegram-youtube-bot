@@ -1,5 +1,6 @@
 import crypto from "crypto"
 
+import Markup from "telegraf/markup"
 import { getOauth2Client } from "../google"
 
 export const authMiddleware = async (ctx, next) => {
@@ -22,5 +23,8 @@ export const authMiddleware = async (ctx, next) => {
     state,
   })
 
-  return ctx.reply(url)
+  return ctx.reply(
+    "Sign up",
+    Markup.inlineKeyboard([Markup.urlButton("Google", url)]).extra(),
+  )
 }

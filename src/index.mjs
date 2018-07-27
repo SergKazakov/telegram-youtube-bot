@@ -6,12 +6,7 @@ import { server } from "./server"
 ;(async () => {
   const webhookUrl = `${process.env.PUBLIC_URL}/${process.env.BOT_TOKEN}`
 
-  const [{ username }, { url: currentWebhookUrl }] = await Promise.all([
-    bot.telegram.getMe(),
-    bot.telegram.getWebhookInfo(),
-  ])
-
-  bot.options.username = username
+  const { url: currentWebhookUrl } = await bot.telegram.getWebhookInfo()
 
   if (currentWebhookUrl !== webhookUrl) {
     await bot.telegram.deleteWebhook()

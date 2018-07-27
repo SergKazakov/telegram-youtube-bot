@@ -7,17 +7,21 @@ export const onFeed = async ({ topic, feed }) => {
   try {
     const [, channelId] = topic.split("=")
 
-    const {
-      feed: {
-        entry: {
-          link: { href },
-        },
-      },
-    } = xmlParser.parse(feed.toString(), {
+    const message = xmlParser.parse(feed.toString(), {
       attributeNamePrefix: "",
       ignoreAttributes: false,
       allowBooleanAttributes: true,
     })
+
+    console.log(JSON.stringify(message))
+
+    const {
+      feed: {
+        entry: { link },
+      },
+    } = message
+
+    console.log(link)
 
     const subscriptions = await Subscription.find({
       channelId,
@@ -30,7 +34,12 @@ export const onFeed = async ({ topic, feed }) => {
     })
 
     await Promise.all(
-      subscribers.map(({ chatId }) => bot.telegram.sendMessage(chatId, href)),
+      subscribers.map(({ chatId }) =>
+        bot.telegram.sendMessage(
+          chatId,
+          Array.isArray(link) ? link[0].href : link.href,
+        ),
+      ),
     )
   } catch (err) {
     console.log(err)

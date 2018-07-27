@@ -36,19 +36,12 @@ export const onSubscribeCommand = async ctx => {
     state: { user },
   } = ctx
 
+  await Subscription.remove({ user: user.id })
+
   const newSubscriptions = []
 
   await Promise.all(
     channels.map(async ({ channelId, ...rest }) => {
-      const subscription = await Subscription.findOne({
-        user: user.id,
-        channelId,
-      })
-
-      if (subscription) {
-        return
-      }
-
       await emitEvent("subscribe")(channelId)
 
       const { id } = await Subscription.create({
@@ -61,9 +54,7 @@ export const onSubscribeCommand = async ctx => {
     }),
   )
 
-  if (newSubscriptions.length > 0) {
-    await user.update({ $push: { subscriptions: newSubscriptions } })
-  }
+  await user.update({ subscriptions: newSubscriptions })
 
   return ctx.reply("success")
 }
