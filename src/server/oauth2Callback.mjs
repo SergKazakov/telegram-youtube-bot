@@ -58,17 +58,13 @@ export const oauth2Callback = handleError(async (req, res) => {
 
   const { userId, chatId } = JSON.parse(decryptedState)
 
-  const user = await User.findOne({ userId, chatId })
+  await User.update(
+    { userId, chatId },
+    { refreshToken: tokens.refresh_token },
+    { upsert: true },
+  )
 
-  if (!user) {
-    await User.create({
-      userId,
-      chatId,
-      refreshToken: tokens.refresh_token,
-    })
-  }
-
-  await bot.telegram.sendMessage(chatId, "Success login")
+  await bot.telegram.sendMessage(chatId, "Success")
 
   const { username } = await bot.telegram.getMe()
 

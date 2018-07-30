@@ -4,6 +4,11 @@ import mongoose from "mongoose"
 import { bot } from "./bot"
 import { server } from "./server"
 ;(async () => {
+  await mongoose.connect(
+    process.env.MONGODB_URL,
+    { useNewUrlParser: true },
+  )
+
   const webhookUrl = `${process.env.PUBLIC_URL}/${process.env.BOT_TOKEN}`
 
   const { url: currentWebhookUrl } = await bot.telegram.getWebhookInfo()
@@ -13,11 +18,6 @@ import { server } from "./server"
 
     await bot.telegram.setWebhook(webhookUrl)
   }
-
-  await mongoose.connect(
-    process.env.MONGODB_URL,
-    { useNewUrlParser: true },
-  )
 
   await util.promisify(cb => server.listen(process.env.SERVER_PORT, cb))()
 

@@ -1,4 +1,5 @@
 import xmlParser from "fast-xml-parser"
+import delve from "dlv"
 import { bot } from "../bot"
 import { User } from "../models/user"
 import { Subscription } from "../models/subscription"
@@ -13,15 +14,11 @@ export const onFeed = async ({ topic, feed }) => {
       allowBooleanAttributes: true,
     })
 
-    console.log(JSON.stringify(message))
+    const link = delve(message, "feed.entry.link")
 
-    const {
-      feed: {
-        entry: { link },
-      },
-    } = message
-
-    console.log(link)
+    if (!link) {
+      return
+    }
 
     const subscriptions = await Subscription.find({
       channelId,

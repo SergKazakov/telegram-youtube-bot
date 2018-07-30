@@ -56,5 +56,5 @@ export const onSubscribeCommand = async ctx => {
 
   await user.update({ subscriptions: newSubscriptions })
 
-  return ctx.reply("success")
+  return ctx.reply(`You was subscribed to ${newSubscriptions.length} channels`)
 }

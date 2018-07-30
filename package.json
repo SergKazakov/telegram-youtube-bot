@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "start": "node --experimental-modules -r dotenv-safe/config src/index.mjs",
-    "dev": "nodemon --inspect --experimental-modules -r dotenv-safe/config src/index.mjs",
-    "test": "eslint --ignore-path .gitignore --fix .",
+    "dev": "nodemon --watch src --inspect --experimental-modules -r dotenv-safe/config src/index.mjs",
+    "test": "eslint --ignore-path .gitignore --fix ./src/**/*.mjs",
     "precommit": "lint-staged"
   },
   "lint-staged": {
@@ -43,24 +43,25 @@
     "semi": false
   },
   "devDependencies": {
-    "eslint": "^5.1.0",
+    "eslint": "^5.2.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-config-xo": "^0.23.0",
     "eslint-plugin-prettier": "^2.6.2",
-    "eslint-plugin-unicorn": "^4.0.3",
+    "eslint-plugin-unicorn": "^5.0.0",
     "husky": "^0.14.3",
     "lint-staged": "^7.2.0",
     "nodemon": "^1.18.3",
-    "prettier": "^1.13.7"
+    "prettier": "^1.14.0"
   },
   "dependencies": {
+    "dlv": "^1.1.2",
     "dotenv-safe": "^6.0.0",
-    "fast-xml-parser": "^3.11.1",
+    "fast-xml-parser": "^3.11.2",
     "googleapis": "^32.0.0",
     "https-proxy-agent": "^2.2.1",
-    "mongoose": "^5.2.4",
+    "mongoose": "^5.2.5",
     "pubsubhubbub": "^0.4.1",
-    "telegraf": "^3.21.2",
+    "telegraf": "^3.22.1",
     "yup": "^0.26.0"
   },
   "engines": {
