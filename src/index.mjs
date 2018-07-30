@@ -19,7 +19,7 @@ import { server } from "./server"
     await bot.telegram.setWebhook(webhookUrl)
   }
 
-  await util.promisify(cb => server.listen(process.env.SERVER_PORT, cb))()
+  await util.promisify(cb => server.listen(process.env.PORT, cb))()
 
-  console.log(`Listening on ${process.env.SERVER_PORT}`)
+  console.log(`Listening on ${process.env.PORT}`)
 })().catch(console.log)
