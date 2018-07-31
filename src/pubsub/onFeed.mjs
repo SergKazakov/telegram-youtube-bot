@@ -1,24 +1,36 @@
 import xmlParser from "fast-xml-parser"
-import delve from "dlv"
+import Redis from "ioredis"
 import { bot } from "../bot"
 import { User } from "../models/user"
 import { Subscription } from "../models/subscription"
+
+const redis = new Redis(process.env.REDIS_URL)
 
 export const onFeed = async ({ topic, feed }) => {
   try {
     const [, channelId] = topic.split("=")
 
-    const message = xmlParser.parse(feed.toString(), {
+    const {
+      feed: { entry },
+    } = xmlParser.parse(feed.toString(), {
       attributeNamePrefix: "",
       ignoreAttributes: false,
       allowBooleanAttributes: true,
     })
 
-    const link = delve(message, "feed.entry.link")
-
-    if (!link) {
+    if (!entry) {
       return
     }
+
+    const { link, "yt:videoId": videoId } = entry
+
+    if (await redis.get(videoId)) {
+      return
+    }
+
+    const WEEK = 7 * 24 * 60 * 60
+
+    await redis.setex(videoId, WEEK)
 
     const subscriptions = await Subscription.find({
       channelId,
