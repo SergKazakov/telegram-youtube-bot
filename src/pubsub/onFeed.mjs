@@ -1,4 +1,3 @@
-import debug from "debug"
 import xmlParser from "fast-xml-parser"
 import Redis from "ioredis"
 import { bot } from "../bot"
@@ -7,11 +6,11 @@ import { Subscription } from "../models/subscription"
 
 const redis = new Redis(process.env.REDIS_URL)
 
-const log = debug("pubsubhubbub")
-
 export const onFeed = async ({ topic, feed }) => {
   try {
     const [, channelId] = topic.split("=")
+
+    console.log(feed.toString())
 
     const message = xmlParser.parse(feed.toString(), {
       attributeNamePrefix: "",
@@ -19,7 +18,7 @@ export const onFeed = async ({ topic, feed }) => {
       allowBooleanAttributes: true,
     })
 
-    log(JSON.stringify(message, null, "\t"))
+    console.log(JSON.stringify(message))
 
     const {
       feed: { entry },
