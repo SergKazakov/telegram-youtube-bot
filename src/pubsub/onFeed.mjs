@@ -1,16 +1,13 @@
 import xmlParser from "fast-xml-parser"
-import Redis from "ioredis"
+import dayjs from "dayjs"
 import { bot } from "../bot"
 import { User } from "../models/user"
 import { Subscription } from "../models/subscription"
-
-const redis = new Redis(process.env.REDIS_URL)
+import { redis } from "../redis"
 
 export const onFeed = async ({ topic, feed }) => {
   try {
     const [, channelId] = topic.split("=")
-
-    console.log(feed.toString())
 
     const message = xmlParser.parse(feed.toString(), {
       attributeNamePrefix: "",
@@ -28,7 +25,11 @@ export const onFeed = async ({ topic, feed }) => {
       return
     }
 
-    const { link, "yt:videoId": videoId } = entry
+    const { link, "yt:videoId": videoId, published } = entry
+
+    if (dayjs().diff(dayjs(published), "days") > 1) {
+      return
+    }
 
     if (await redis.get(videoId)) {
       return

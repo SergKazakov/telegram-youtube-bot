@@ -1,9 +1,12 @@
 import util from "util"
 
 import mongoose from "mongoose"
+import { redis } from "./redis"
 import { bot } from "./bot"
 import { server } from "./server"
 ;(async () => {
+  await redis.connect()
+
   await mongoose.connect(
     process.env.MONGODB_URL,
     { useNewUrlParser: true },
