@@ -35,9 +35,9 @@ export const onFeed = async ({ topic, feed }) => {
       return
     }
 
-    const WEEK = 7 * 24 * 60 * 60
+    const DAY = 24 * 60 * 60
 
-    await redis.setex(videoId, WEEK, true)
+    await redis.setex(videoId, DAY, true)
 
     const subscriptions = await Subscription.find({
       channelId,

@@ -54,6 +54,7 @@
     "prettier": "^1.14.0"
   },
   "dependencies": {
+    "@godaddy/terminus": "^2.4.1",
     "dayjs": "^1.7.4",
     "dotenv-safe": "^6.0.0",
     "fast-xml-parser": "^3.11.2",
