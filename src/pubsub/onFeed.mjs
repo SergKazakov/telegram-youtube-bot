@@ -59,7 +59,7 @@ export const onFeed = async ({ topic, feed }) => {
       subscribers.map(({ chatId }) =>
         bot.telegram.sendMessage(
           chatId,
-          `[*${name}*: ${title}](${
+          `[${name} - ${title}](${
             Array.isArray(link) ? link[0].href : link.href
           })`,
           { parse_mode: "Markdown" },
