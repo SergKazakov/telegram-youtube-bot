@@ -25,7 +25,13 @@ export const onFeed = async ({ topic, feed }) => {
       return
     }
 
-    const { link, "yt:videoId": videoId, published } = entry
+    const {
+      link,
+      "yt:videoId": videoId,
+      published,
+      title,
+      author: { name },
+    } = entry
 
     if (dayjs().diff(dayjs(published), "days") > 1) {
       return
@@ -53,7 +59,10 @@ export const onFeed = async ({ topic, feed }) => {
       subscribers.map(({ chatId }) =>
         bot.telegram.sendMessage(
           chatId,
-          Array.isArray(link) ? link[0].href : link.href,
+          `[*${name}*: ${title}](${
+            Array.isArray(link) ? link[0].href : link.href
+          })`,
+          { parse_mode: "Markdown" },
         ),
       ),
     )
