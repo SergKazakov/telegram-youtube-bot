@@ -33,7 +33,7 @@ export const onFeed = async ({ topic, feed }) => {
       author: { name },
     } = entry
 
-    if (dayjs().diff(dayjs(published), "days") > 1) {
+    if (dayjs().diff(dayjs(published), "days", true) > 1) {
       return
     }
 
