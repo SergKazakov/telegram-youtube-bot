@@ -1,4 +1,5 @@
 import xmlParser from "fast-xml-parser"
+import Dumper from "dumper.js/src/dumper"
 import dayjs from "dayjs"
 import { bot } from "../bot"
 import { User } from "../models/user"
@@ -15,7 +16,7 @@ export const onFeed = async ({ topic, feed }) => {
       allowBooleanAttributes: true,
     })
 
-    console.log(JSON.stringify(message))
+    console.log(new Dumper().generateDump(message))
 
     const {
       feed: { entry },
