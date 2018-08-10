@@ -60,6 +60,7 @@
     "dumper.js": "^0.1.1",
     "fast-xml-parser": "^3.11.2",
     "googleapis": "^32.0.0",
+    "he": "^1.1.1",
     "https-proxy-agent": "^2.2.1",
     "ioredis": "^3.2.2",
     "mongoose": "^5.2.5",

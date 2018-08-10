@@ -1,4 +1,5 @@
 import xmlParser from "fast-xml-parser"
+import he from "he"
 import Dumper from "dumper.js/src/dumper"
 import dayjs from "dayjs"
 import { bot } from "../bot"
@@ -14,6 +15,7 @@ export const onFeed = async ({ topic, feed }) => {
       attributeNamePrefix: "",
       ignoreAttributes: false,
       allowBooleanAttributes: true,
+      attrValueProcessor: a => he.decode(a, { isAttributeValue: true }),
     })
 
     console.log(new Dumper().generateDump(message))
