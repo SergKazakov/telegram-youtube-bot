@@ -1,12 +1,15 @@
 import util from "util"
 import pubsubhubbub from "pubsubhubbub"
 import { onFeed } from "./onFeed"
+import { onSubscribe } from "./onSubscribe"
 
 export const pubsub = pubsubhubbub.createServer({
   callbackUrl: `${process.env.PUBLIC_URL}/pubsubhubbub`,
 })
 
 pubsub.on("feed", onFeed)
+
+pubsub.on("subscribe", onSubscribe)
 
 export const emitEvent = event => channelId =>
   util.promisify(cb =>
