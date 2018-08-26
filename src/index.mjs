@@ -19,8 +19,10 @@ import { handleError } from "./utils/handleError"
 
   subscriber.on(
     "message",
-    handleError(async (_, channelId) => {
-      if (channelId.startsWith("channel_id")) {
+    handleError(async (_, message) => {
+      if (message.startsWith("channel_id")) {
+        const [, channelId] = message.split(":")
+
         await emitEvent("subscribe")(channelId)
       }
     }),
