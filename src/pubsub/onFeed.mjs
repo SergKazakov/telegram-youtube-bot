@@ -2,6 +2,7 @@ import xmlParser from "fast-xml-parser"
 import he from "he"
 import Dumper from "dumper.js/src/dumper"
 import dayjs from "dayjs"
+
 import { bot } from "../bot"
 import { User } from "../models/user"
 import { Subscription } from "../models/subscription"
@@ -49,10 +50,7 @@ export const onFeed = handleError(async ({ topic, feed }) => {
 
   await redis.setex(videoId, DAY, true)
 
-  const subscriptions = await Subscription.find({
-    channelId,
-    isNotificationEnabled: true,
-  })
+  const subscriptions = await Subscription.find({ channelId })
 
   const subscribers = await User.find({
     _id: { $in: subscriptions.map(({ user }) => user) },

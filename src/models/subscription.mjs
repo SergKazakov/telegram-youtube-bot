@@ -4,8 +4,6 @@ const schema = new mongoose.Schema(
   {
     channelId: { type: String, required: true },
     user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" },
-    isNotificationEnabled: { type: Boolean, required: true, default: true },
-    title: { type: String, required: true },
   },
   { timestamps: true },
 )

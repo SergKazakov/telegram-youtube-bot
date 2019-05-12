@@ -3,10 +3,11 @@ import util from "util"
 import mongoose from "mongoose"
 import terminus from "@godaddy/terminus"
 import Redis from "ioredis"
-import { redis } from "./redis"
+
 import { bot } from "./bot"
-import { server } from "./server"
 import { emitEvent } from "./pubsub"
+import { redis } from "./redis"
+import { server } from "./server"
 import { handleError } from "./utils/handleError"
 ;(async () => {
   await redis.connect()
@@ -30,10 +31,7 @@ import { handleError } from "./utils/handleError"
 
   const {
     models: { User },
-  } = await mongoose.connect(
-    process.env.MONGODB_URL,
-    { useNewUrlParser: true },
-  )
+  } = await mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true })
 
   const webhookUrl = `${process.env.PUBLIC_URL}/${process.env.BOT_TOKEN}`
 
@@ -45,7 +43,7 @@ import { handleError } from "./utils/handleError"
     await bot.telegram.setWebhook(webhookUrl)
   }
 
-  terminus(server, {
+  terminus.createTerminus(server, {
     healthChecks: {
       "/healthcheck": async () => {
         if (redis.status !== "ready") {

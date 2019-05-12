@@ -22,10 +22,9 @@ export const onSubscribeCommand = async ctx => {
       ...data.items.map(
         ({
           snippet: {
-            title,
             resourceId: { channelId },
           },
-        }) => ({ channelId, title }),
+        }) => channelId,
       ),
     )
 
@@ -36,25 +35,24 @@ export const onSubscribeCommand = async ctx => {
     state: { user },
   } = ctx
 
-  await Subscription.remove({ user: user.id })
+  await Subscription.deleteMany({ user: user.id })
 
   const newSubscriptions = []
 
   await Promise.all(
-    channels.map(async ({ channelId, ...rest }) => {
+    channels.map(async channelId => {
       await emitEvent("subscribe")(channelId)
 
       const { id } = await Subscription.create({
         channelId,
         user: user.id,
-        ...rest,
       })
 
       newSubscriptions.push(id)
     }),
   )
 
-  await user.update({ subscriptions: newSubscriptions })
+  await user.updateOne({ subscriptions: newSubscriptions })
 
   return ctx.reply(`You were subscribed to ${newSubscriptions.length} channels`)
 }
