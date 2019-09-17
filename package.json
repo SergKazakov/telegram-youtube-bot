@@ -6,17 +6,6 @@
     "dev": "nodemon --watch src --inspect --experimental-modules -r dotenv-safe/config src/index.mjs",
     "test": "eslint --ignore-path .gitignore --fix ./src/**/*.mjs"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.mjs": [
-      "eslint --fix",
-      "git add -A"
-    ]
-  },
   "eslintConfig": {
     "root": true,
     "extends": [
@@ -52,14 +41,13 @@
     "semi": false
   },
   "devDependencies": {
+    "@arkweid/lefthook": "^0.6.3",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.2.0",
     "eslint-config-xo": "^0.26.0",
     "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-unicorn": "^8.0.2",
-    "husky": "^2.2.0",
-    "lint-staged": "^8.1.6",
     "nodemon": "^1.19.0",
     "prettier": "^1.17.0"
   },
