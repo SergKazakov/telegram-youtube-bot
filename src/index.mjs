@@ -33,14 +33,18 @@ import { handleError } from "./utils/handleError"
     models: { User },
   } = await mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true })
 
-  const webhookUrl = `${process.env.PUBLIC_URL}/${process.env.BOT_TOKEN}`
+  if (process.env.NODE_ENV === "production") {
+    const webhookUrl = `${process.env.PUBLIC_URL}/${process.env.BOT_TOKEN}`
 
-  const { url: currentWebhookUrl } = await bot.telegram.getWebhookInfo()
+    const { url: currentWebhookUrl } = await bot.telegram.getWebhookInfo()
 
-  if (currentWebhookUrl !== webhookUrl) {
-    await bot.telegram.deleteWebhook()
+    if (currentWebhookUrl !== webhookUrl) {
+      await bot.telegram.deleteWebhook()
 
-    await bot.telegram.setWebhook(webhookUrl)
+      await bot.telegram.setWebhook(webhookUrl)
+    }
+  } else {
+    await bot.launch()
   }
 
   terminus.createTerminus(server, {
