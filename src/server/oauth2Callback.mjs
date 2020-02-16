@@ -7,6 +7,7 @@ import { bot } from "../bot"
 import { getOauth2Client } from "../google"
 import { User } from "../models/user"
 
+// eslint-disable-next-line unicorn/consistent-function-scoping
 const handleError = fn => async (req, res) => {
   try {
     await fn(req, res)
