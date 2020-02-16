@@ -9,7 +9,7 @@ import { oauth2Callback } from "./oauth2Callback"
 export const server = http.createServer((req, res) => {
   const { pathname } = url.parse(req.url)
 
-  const webhookUrl = `/${process.env.BOT_TOKEN}`
+  const webhookUrl = "/bot-webhook"
 
   if (pathname === webhookUrl) {
     return bot.webhookCallback(webhookUrl)(req, res)

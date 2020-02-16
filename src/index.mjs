@@ -34,7 +34,7 @@ import { handleError } from "./utils/handleError"
   } = await mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true })
 
   if (process.env.NODE_ENV === "production") {
-    const webhookUrl = `${process.env.PUBLIC_URL}/${process.env.BOT_TOKEN}`
+    const webhookUrl = `${process.env.PUBLIC_URL}/bot-webhook`
 
     const { url: currentWebhookUrl } = await bot.telegram.getWebhookInfo()
 
