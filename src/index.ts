@@ -8,27 +8,28 @@ import { redis } from "./redis"
 import { server } from "./server"
 import { handleError } from "./utils/handleError"
 import { User } from "./models/user"
-;(async () => {
+;(async (): Promise<void> => {
   await redis.connect()
 
-  redis.on("ready", () => redis.config("SET", "notify-keyspace-events", "KEA"))
+  redis.on("ready", () => {
+    redis.config("SET", "notify-keyspace-events", "KEA").catch(console.log)
+  })
 
   const subscriber = new Redis(process.env.REDIS_URL)
 
   await subscriber.subscribe("__keyevent@0__:expired")
 
-  subscriber.on(
-    "message",
-    handleError(async (_, message) => {
+  subscriber.on("message", (_: string, message: string) => {
+    handleError(async () => {
       if (message.startsWith("channel_id")) {
         const [, channelId] = message.split(":")
 
         await emitEvent("subscribe")(channelId)
       }
-    }),
-  )
+    })
+  })
 
-  await mongoose.connect(process.env.MONGODB_URL, {
+  await mongoose.connect(process.env.MONGODB_URL as string, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -49,7 +50,7 @@ import { User } from "./models/user"
 
   terminus.createTerminus(server, {
     healthChecks: {
-      "/healthcheck": async () => {
+      "/healthcheck": async (): Promise<void> => {
         if (redis.status !== "ready") {
           throw new Error("Redis is not ready")
         }
@@ -58,7 +59,7 @@ import { User } from "./models/user"
       },
     },
     signals: ["SIGINT", "SIGTERM"],
-    onSignal: () =>
+    onSignal: async () =>
       Promise.all([
         redis.quit().catch(console.log),
         subscriber.quit().catch(console.log),

@@ -1,8 +1,8 @@
-import Markup from "telegraf/markup"
+import { Markup, Middleware, Context } from "telegraf"
 
 import { getOauth2Client } from "../google"
 
-export const authMiddleware = async (ctx, next) => {
+export const authMiddleware: Middleware<Context> = (ctx, next) => {
   if (ctx.state.user) {
     return next()
   }
@@ -11,7 +11,7 @@ export const authMiddleware = async (ctx, next) => {
     access_type: "offline",
     scope: ["https://www.googleapis.com/auth/youtube.readonly"],
     state: Buffer.from(
-      JSON.stringify({ userId: ctx.from.id, chatId: ctx.chat.id }),
+      JSON.stringify({ userId: ctx.from?.id, chatId: ctx.chat?.id }),
     ).toString("base64"),
   })
 

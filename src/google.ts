@@ -7,7 +7,7 @@ export const getOauth2Client = () =>
     process.env.GOOGLE_REDIRECT_URL,
   )
 
-export const getYoutubeClient = refreshToken => {
+export const getYoutubeClient = (refreshToken: string) => {
   const auth = getOauth2Client()
 
   auth.setCredentials({ refresh_token: refreshToken })

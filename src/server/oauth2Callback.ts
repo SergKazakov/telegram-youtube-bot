@@ -1,12 +1,16 @@
 import url from "url"
-
-import yup from "yup"
+import http from "http"
 
 import { bot } from "../bot"
 import { getOauth2Client } from "../google"
 import { User } from "../models/user"
 
-const handleError = fn => async (req, res) => {
+const handleError = (
+  fn: (req: http.IncomingMessage, res: http.ServerResponse) => Promise<void>,
+) => async (
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+): Promise<void> => {
   try {
     await fn(req, res)
   } catch (error) {
@@ -21,19 +25,24 @@ const handleError = fn => async (req, res) => {
   }
 }
 
-const schema = yup.object().shape({
-  code: yup.string().trim().required(),
-  state: yup.string().trim().required(),
-})
+class AuthenticationError extends Error {
+  constructor(public status: number = 401) {
+    super("Authentication failed")
+  }
+}
 
 export const oauth2Callback = handleError(async (req, res) => {
-  const { query } = url.parse(req.url, true)
+  const { query } = url.parse(req.url as string, true)
 
-  const { code, state } = await schema.validate(query)
+  if (!query.code || !query.state) {
+    throw new AuthenticationError()
+  }
 
-  const { tokens } = await getOauth2Client().getToken(code)
+  const { tokens } = await getOauth2Client().getToken(query.code)
 
-  const { userId, chatId } = JSON.parse(Buffer.from(state, "base64").toString())
+  const { userId, chatId } = JSON.parse(
+    Buffer.from(query.state, "base64").toString(),
+  )
 
   await User.updateOne(
     { userId, chatId },

@@ -1,8 +1,10 @@
+import { Middleware, Context } from "telegraf"
+
 import { getYoutubeClient } from "../google"
 import { emitEvent } from "../pubsub"
 import { Subscription } from "../models/subscription"
 
-export const onSubscribeCommand = async ctx => {
+export const onSubscribeCommand: Middleware<Context> = async ctx => {
   const youtube = getYoutubeClient(ctx.state.user.refreshToken)
 
   const channels = []
@@ -18,15 +20,7 @@ export const onSubscribeCommand = async ctx => {
       ...(nextPage && { pageToken: nextPage }),
     })
 
-    channels.push(
-      ...data.items.map(
-        ({
-          snippet: {
-            resourceId: { channelId },
-          },
-        }) => channelId,
-      ),
-    )
+    channels.push(...data.items.map((x: any) => x.snippet.resourceId.channelId))
 
     nextPage = data.nextPageToken
   } while (nextPage)
@@ -37,7 +31,7 @@ export const onSubscribeCommand = async ctx => {
 
   await Subscription.deleteMany({ user: user.id })
 
-  const newSubscriptions = []
+  const newSubscriptions: string[] = []
 
   await Promise.all(
     channels.map(async channelId => {

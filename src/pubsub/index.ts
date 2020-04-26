@@ -13,7 +13,9 @@ pubsub.on("feed", onFeed)
 
 pubsub.on("subscribe", onSubscribe)
 
-export const emitEvent = event => channelId =>
+export const emitEvent = (event: "subscribe") => (
+  channelId: string,
+): Promise<unknown> =>
   promisify(cb =>
     pubsub[event](
       `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${channelId}`,

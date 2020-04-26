@@ -7,7 +7,7 @@ import { bot } from "../bot"
 import { oauth2Callback } from "./oauth2Callback"
 
 export const server = http.createServer((req, res) => {
-  const { pathname } = url.parse(req.url)
+  const { pathname } = url.parse(req.url as string)
 
   const webhookUrl = "/bot-webhook"
 

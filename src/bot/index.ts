@@ -5,7 +5,7 @@ import { errorHandler } from "./errorHandler"
 import { authMiddleware } from "./authMiddleware"
 import { onSubscribeCommand } from "./onSubscribeCommand"
 
-export const bot = new Telegraf(process.env.BOT_TOKEN)
+export const bot = new Telegraf(process.env.BOT_TOKEN as string)
 
 bot
   .use(getUserMiddleware)

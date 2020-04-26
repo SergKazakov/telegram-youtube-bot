@@ -1,17 +1,22 @@
 {
   "private": true,
   "scripts": {
-    "start": "node --experimental-specifier-resolution=node -r dotenv-safe/config src/index.mjs",
-    "dev": "nodemon --watch src --inspect --experimental-specifier-resolution=node -r dotenv-safe/config src/index.mjs",
-    "test": "eslint --ignore-path .gitignore --fix --ext mjs ."
+    "prestart": "npm run build",
+    "start": "node -r dotenv-safe/config dist",
+    "dev": "ts-node-dev -T --notify=false -r dotenv-safe/config src",
+    "test": "eslint --ignore-path .gitignore --fix --ext ts .",
+    "build": "tsc"
   },
   "eslintConfig": {
     "root": true,
     "extends": [
       "plugin:import/recommended",
+      "plugin:import/typescript",
       "xo/esnext",
       "plugin:unicorn/recommended",
-      "plugin:prettier/recommended"
+      "plugin:@typescript-eslint/recommended",
+      "plugin:prettier/recommended",
+      "prettier/@typescript-eslint"
     ],
     "rules": {
       "unicorn/filename-case": [
@@ -37,6 +42,9 @@
       ]
     }
   },
+  "eslintIgnore": [
+    "dist"
+  ],
   "prettier": {
     "trailingComma": "all",
     "semi": false,
@@ -44,14 +52,22 @@
   },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.2",
+    "@tsconfig/node12": "^1.0.7",
+    "@types/he": "^1.1.1",
+    "@types/ioredis": "^4.17.9",
+    "@types/mongoose": "^5.10.3",
+    "@types/node": "^14.14.14",
+    "@typescript-eslint/eslint-plugin": "^4.10.0",
+    "@typescript-eslint/parser": "^4.10.0",
     "eslint": "^7.16.0",
     "eslint-config-prettier": "^7.1.0",
     "eslint-config-xo": "^0.33.1",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.3.0",
     "eslint-plugin-unicorn": "^24.0.0",
-    "nodemon": "^2.0.6",
-    "prettier": "^2.2.1"
+    "prettier": "^2.2.1",
+    "ts-node-dev": "1.1.1",
+    "typescript": "^4.1.3"
   },
   "dependencies": {
     "@godaddy/terminus": "^4.5.0",
@@ -64,8 +80,7 @@
     "ioredis": "^4.19.4",
     "mongoose": "^5.11.8",
     "pubsubhubbub": "^1.0.1",
-    "telegraf": "^3.38.0",
-    "yup": "^0.32.8"
+    "telegraf": "^3.38.0"
   },
   "engines": {
     "node": "12"
