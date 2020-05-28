@@ -63,7 +63,7 @@
     "mongoose": "^5.8.2",
     "pubsubhubbub": "^1.0.1",
     "telegraf": "^3.34.1",
-    "yup": "^0.28.0"
+    "yup": "^0.29.1"
   },
   "engines": {
     "node": "11"
