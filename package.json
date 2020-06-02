@@ -59,7 +59,7 @@
     "fast-xml-parser": "^3.15.1",
     "googleapis": "^46.0.0",
     "he": "^1.2.0",
-    "ioredis": "^4.14.1",
+    "ioredis": "^4.17.3",
     "mongoose": "^5.8.2",
     "pubsubhubbub": "^1.0.1",
     "telegraf": "^3.34.1",
