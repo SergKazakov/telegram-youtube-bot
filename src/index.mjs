@@ -16,7 +16,7 @@ import { handleError } from "./utils/handleError"
 
   const subscriber = new Redis(process.env.REDIS_URL)
 
-  subscriber.subscribe("__keyevent@0__:expired")
+  await subscriber.subscribe("__keyevent@0__:expired")
 
   subscriber.on(
     "message",
