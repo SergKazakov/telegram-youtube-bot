@@ -51,7 +51,7 @@ export const onFeed = handleError(async ({ topic, feed }) => {
   const subscriptions = await Subscription.find({ channelId })
 
   const subscribers = await User.find({
-    _id: { $in: subscriptions.map(({ user }) => user) },
+    _id: { $in: subscriptions.map(x => x.user) },
     chatId: { $ne: null },
   })
 

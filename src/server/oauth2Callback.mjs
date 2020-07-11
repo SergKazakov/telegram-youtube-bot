@@ -7,7 +7,6 @@ import { bot } from "../bot"
 import { getOauth2Client } from "../google"
 import { User } from "../models/user"
 
-// eslint-disable-next-line unicorn/consistent-function-scoping
 const handleError = fn => async (req, res) => {
   try {
     await fn(req, res)
@@ -28,7 +27,7 @@ const decrypt = data => {
     const decipher = crypto.createDecipher("aes192", process.env.CRYPTO_SECRET)
 
     return decipher.update(data, "hex", "utf8") + decipher.final("utf8")
-  } catch (_) {
+  } catch {
     const error = new Error("Authentication failed")
 
     error.status = 401
@@ -38,14 +37,8 @@ const decrypt = data => {
 }
 
 const schema = yup.object().shape({
-  code: yup
-    .string()
-    .trim()
-    .required(),
-  state: yup
-    .string()
-    .trim()
-    .required(),
+  code: yup.string().trim().required(),
+  state: yup.string().trim().required(),
 })
 
 export const oauth2Callback = handleError(async (req, res) => {

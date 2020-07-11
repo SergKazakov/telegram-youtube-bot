@@ -7,7 +7,7 @@ export const onSubscribeCommand = async ctx => {
 
   const channels = []
 
-  let nextPage = null
+  let nextPage
 
   do {
     // eslint-disable-next-line no-await-in-loop
