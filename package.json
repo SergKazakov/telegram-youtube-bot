@@ -1,9 +1,8 @@
 {
-  "name": "telegram-youtube-bot",
   "private": true,
   "scripts": {
-    "start": "node --experimental-modules -r dotenv-safe/config src/index.mjs",
-    "dev": "nodemon --watch src --inspect --experimental-modules -r dotenv-safe/config src/index.mjs",
+    "start": "node --experimental-specifier-resolution=node -r dotenv-safe/config src/index.mjs",
+    "dev": "nodemon --watch src --inspect --experimental-specifier-resolution=node -r dotenv-safe/config src/index.mjs",
     "test": "eslint --ignore-path .gitignore --fix ./src/**/*.mjs"
   },
   "eslintConfig": {
@@ -69,6 +68,6 @@
     "yup": "^0.28.0"
   },
   "engines": {
-    "node": "11"
+    "node": "12"
   }
 }
