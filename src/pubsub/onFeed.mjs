@@ -17,7 +17,7 @@ export const onFeed = handleError(async ({ topic, feed }) => {
     ignoreAttributes: false,
     allowBooleanAttributes: true,
     attrValueProcessor: a => he.decode(a, { isAttributeValue: true }),
-    tagValueProcessor: he.decode,
+    tagValueProcessor: x => he.decode(x),
   })
 
   console.log(new Dumper().generateDump(message))
