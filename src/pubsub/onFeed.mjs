@@ -52,7 +52,7 @@ export const onFeed = handleError(async ({ topic, feed }) => {
 
   const subscribers = await User.find({
     _id: { $in: subscriptions.map(x => x.user) },
-    chatId: { $ne: null },
+    chatId: { $type: "number" },
   })
 
   await Promise.all(
