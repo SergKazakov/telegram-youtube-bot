@@ -7,6 +7,7 @@ import { emitEvent } from "./pubsub"
 import { redis } from "./redis"
 import { server } from "./server"
 import { handleError } from "./utils/handleError"
+import { User } from "./models/user"
 ;(async () => {
   await redis.connect()
 
@@ -27,9 +28,10 @@ import { handleError } from "./utils/handleError"
     }),
   )
 
-  const {
-    models: { User },
-  } = await mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true })
+  await mongoose.connect(process.env.MONGODB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
 
   if (process.env.NODE_ENV === "production") {
     const webhookUrl = `${process.env.PUBLIC_URL}/bot-webhook`
