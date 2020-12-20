@@ -1,4 +1,4 @@
-import util from "util"
+import { promisify } from "util"
 
 import pubsubhubbub from "pubsubhubbub"
 
@@ -14,7 +14,7 @@ pubsub.on("feed", onFeed)
 pubsub.on("subscribe", onSubscribe)
 
 export const emitEvent = event => channelId =>
-  util.promisify(cb =>
+  promisify(cb =>
     pubsub[event](
       `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${channelId}`,
       "https://pubsubhubbub.appspot.com",

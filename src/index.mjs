@@ -1,5 +1,3 @@
-import util from "util"
-
 import mongoose from "mongoose"
 import terminus from "@godaddy/terminus"
 import Redis from "ioredis"
@@ -67,7 +65,7 @@ import { handleError } from "./utils/handleError"
     logger: console.log,
   })
 
-  await util.promisify(cb => server.listen(process.env.PORT, cb))()
-
-  console.log(`Listening on ${process.env.PORT}`)
+  server.listen(process.env.PORT, () =>
+    console.log(`Listening on ${process.env.PORT}`),
+  )
 })().catch(console.log)

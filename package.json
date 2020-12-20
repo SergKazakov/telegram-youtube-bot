@@ -3,7 +3,7 @@
   "scripts": {
     "start": "node --experimental-specifier-resolution=node -r dotenv-safe/config src/index.mjs",
     "dev": "nodemon --watch src --inspect --experimental-specifier-resolution=node -r dotenv-safe/config src/index.mjs",
-    "test": "eslint --ignore-path .gitignore --fix ./src/**/*.mjs"
+    "test": "eslint --ignore-path .gitignore --fix --ext mjs ."
   },
   "eslintConfig": {
     "root": true,
@@ -44,14 +44,14 @@
   },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.2",
-    "eslint": "^7.4.0",
-    "eslint-config-prettier": "^6.11.0",
-    "eslint-config-xo": "^0.32.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-unicorn": "^20.1.0",
-    "nodemon": "^2.0.4",
-    "prettier": "^2.0.5"
+    "eslint": "^7.16.0",
+    "eslint-config-prettier": "^7.1.0",
+    "eslint-config-xo": "^0.33.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.3.0",
+    "eslint-plugin-unicorn": "^24.0.0",
+    "nodemon": "^2.0.6",
+    "prettier": "^2.2.1"
   },
   "dependencies": {
     "@godaddy/terminus": "^4.4.1",
