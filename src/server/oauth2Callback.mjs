@@ -1,5 +1,4 @@
 import url from "url"
-import crypto from "crypto"
 
 import yup from "yup"
 
@@ -22,20 +21,6 @@ const handleError = fn => async (req, res) => {
   }
 }
 
-const decrypt = data => {
-  try {
-    const decipher = crypto.createDecipher("aes192", process.env.CRYPTO_SECRET)
-
-    return decipher.update(data, "hex", "utf8") + decipher.final("utf8")
-  } catch {
-    const error = new Error("Authentication failed")
-
-    error.status = 401
-
-    throw error
-  }
-}
-
 const schema = yup.object().shape({
   code: yup.string().trim().required(),
   state: yup.string().trim().required(),
@@ -46,11 +31,9 @@ export const oauth2Callback = handleError(async (req, res) => {
 
   const { code, state } = await schema.validate(query)
 
-  const decryptedState = decrypt(state)
-
   const { tokens } = await getOauth2Client().getToken(code)
 
-  const { userId, chatId } = JSON.parse(decryptedState)
+  const { userId, chatId } = JSON.parse(Buffer.from(state, "base64").toString())
 
   await User.updateOne(
     { userId, chatId },
