@@ -37,22 +37,16 @@ export const onSubscribeCommand = async ctx => {
 
   await Subscription.deleteMany({ user: user.id })
 
-  const newSubscriptions = []
-
-  await Promise.all(
-    channels.map(async channelId => {
-      await emitEvent("subscribe")(channelId)
-
-      const { id } = await Subscription.create({
-        channelId,
-        user: user.id,
-      })
-
-      newSubscriptions.push(id)
-    }),
+  const newSubscriptions = await Subscription.create(
+    channels.map(x => ({ channelId: x, user: user.id })),
   )
 
-  await user.updateOne({ subscriptions: newSubscriptions })
+  await user.updateOne({ subscriptions: newSubscriptions.map(x => x.id) })
+
+  for (const x of channels) {
+    // eslint-disable-next-line no-await-in-loop
+    await emitEvent("subscribe")(x)
+  }
 
   return ctx.reply(`You were subscribed to ${newSubscriptions.length} channels`)
 }
