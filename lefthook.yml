@@ -1,6 +1,6 @@
 pre-commit:
   parallel: true
   commands:
-    js:
+    eslint:
       glob: "*.mjs"
       run: eslint --fix {staged_files} && git add {staged_files}
