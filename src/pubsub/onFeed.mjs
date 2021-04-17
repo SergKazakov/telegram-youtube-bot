@@ -1,6 +1,5 @@
 import xmlParser from "fast-xml-parser"
 import he from "he"
-import Dumper from "dumper.js/src/dumper"
 import dayjs from "dayjs"
 
 import { bot } from "../bot"
@@ -20,7 +19,7 @@ export const onFeed = handleError(async ({ topic, feed }) => {
     tagValueProcessor: x => he.decode(x),
   })
 
-  console.log(new Dumper().generateDump(message))
+  console.log(JSON.stringify(message, null, 2))
 
   const {
     feed: { entry },
