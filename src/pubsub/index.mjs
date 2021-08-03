@@ -1,5 +1,4 @@
-import { promisify } from "util"
-
+import { promisify } from "node:util"
 import pubsubhubbub from "pubsubhubbub"
 
 import { onFeed } from "./onFeed"

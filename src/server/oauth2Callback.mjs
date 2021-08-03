@@ -1,5 +1,4 @@
-import url from "url"
-
+import url from "node:url"
 import yup from "yup"
 
 import { bot } from "../bot"

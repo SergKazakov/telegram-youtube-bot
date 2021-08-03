@@ -1,5 +1,5 @@
-import http from "http"
-import url from "url"
+import http from "node:http"
+import url from "node:url"
 
 import { pubsub } from "../pubsub"
 import { bot } from "../bot"
