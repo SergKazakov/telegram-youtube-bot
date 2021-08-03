@@ -37,7 +37,9 @@
       "import/no-unresolved": [
         "error",
         {
-          "ignore": ["^node:"]
+          "ignore": [
+            "^node:"
+          ]
         }
       ]
     }
@@ -59,17 +61,17 @@
     "prettier": "^2.3.2"
   },
   "dependencies": {
-    "@godaddy/terminus": "^4.5.0",
-    "dayjs": "^1.9.7",
+    "@godaddy/terminus": "^4.9.0",
+    "dayjs": "^1.10.6",
     "dotenv-safe": "^8.2.0",
-    "fast-xml-parser": "^3.17.5",
-    "googleapis": "^66.0.0",
+    "fast-xml-parser": "^3.19.0",
+    "googleapis": "^83.0.0",
     "he": "^1.2.0",
-    "ioredis": "^4.19.4",
-    "mongoose": "^5.11.8",
+    "ioredis": "^4.27.7",
+    "mongoose": "^5.13.5",
     "pubsubhubbub": "^1.0.1",
-    "telegraf": "^3.38.0",
-    "yup": "^0.32.8"
+    "telegraf": "^4.4.1",
+    "yup": "^0.32.9"
   },
   "engines": {
     "node": "14"

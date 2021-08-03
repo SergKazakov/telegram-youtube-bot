@@ -1,4 +1,4 @@
-import Telegraf from "telegraf"
+import { Telegraf } from "telegraf"
 
 import { getUserMiddleware } from "./getUserMiddleware"
 import { errorHandler } from "./errorHandler"

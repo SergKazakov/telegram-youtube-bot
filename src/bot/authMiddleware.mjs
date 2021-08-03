@@ -1,4 +1,4 @@
-import Markup from "telegraf/markup"
+import { Markup } from "telegraf"
 
 import { getOauth2Client } from "../google"
 
@@ -17,6 +17,6 @@ export const authMiddleware = async (ctx, next) => {
 
   return ctx.reply(
     "Sign up",
-    Markup.inlineKeyboard([Markup.urlButton("Google", url)]).extra(),
+    Markup.inlineKeyboard([Markup.button.url("Google", url)]),
   )
 }
