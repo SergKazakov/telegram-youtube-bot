@@ -9,14 +9,11 @@ const handleError = fn => async (req, res) => {
   try {
     await fn(req, res)
   } catch (error) {
-    res.writeHead(
-      error.name === "ValidationError" ? 400 : error.status || 500,
-      {
+    res
+      .writeHead(error.name === "ValidationError" ? 400 : error.status || 500, {
         "Content-Type": "application/json",
-      },
-    )
-
-    res.end(JSON.stringify({ message: error.message }))
+      })
+      .end(JSON.stringify({ message: error.message }))
   }
 }
 
@@ -44,7 +41,5 @@ export const oauth2Callback = handleError(async (req, res) => {
 
   const { username } = await bot.telegram.getMe()
 
-  res.writeHead(302, { Location: `https://t.me/${username}` })
-
-  res.end()
+  res.writeHead(302, { Location: `https://t.me/${username}` }).end()
 })
