@@ -1,5 +1,6 @@
 import url from "node:url"
-import yup from "yup"
+
+import * as yup from "yup"
 
 import { bot } from "../bot"
 import { getOauth2Client } from "../google"

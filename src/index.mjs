@@ -49,7 +49,7 @@ import { User } from "./models/user"
 
   terminus.createTerminus(server, {
     healthChecks: {
-      "/healthcheck": async () => {
+      async "/healthcheck"() {
         if (redis.status !== "ready") {
           throw new Error("Redis is not ready")
         }
