@@ -11,7 +11,7 @@ import { User } from "./models/user"
 ;(async () => {
   await redis.connect()
 
-  redis.on("ready", () => redis.config("SET", "notify-keyspace-events", "KEA"))
+  await redis.config("SET", "notify-keyspace-events", "KEA")
 
   const subscriber = new Redis(process.env.REDIS_URL)
 
