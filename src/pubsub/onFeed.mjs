@@ -1,4 +1,4 @@
-import xmlParser from "fast-xml-parser"
+import { XMLParser } from "fast-xml-parser"
 import he from "he"
 import dayjs from "dayjs"
 
@@ -11,13 +11,14 @@ import { handleError } from "../utils/handleError"
 export const onFeed = handleError(async ({ topic, feed }) => {
   const [, channelId] = topic.split("=")
 
-  const message = xmlParser.parse(feed.toString(), {
+  const message = new XMLParser({
     attributeNamePrefix: "",
     ignoreAttributes: false,
     allowBooleanAttributes: true,
-    attrValueProcessor: a => he.decode(a, { isAttributeValue: true }),
-    tagValueProcessor: x => he.decode(x),
-  })
+    attributeValueProcessor: (_, value) =>
+      he.decode(value, { isAttributeValue: true }),
+    tagValueProcessor: (_, value) => he.decode(value),
+  }).parse(feed.toString())
 
   console.log(JSON.stringify(message, null, 2))
 

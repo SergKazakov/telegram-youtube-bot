@@ -61,17 +61,17 @@
     "prettier": "^2.7.1"
   },
   "dependencies": {
-    "@godaddy/terminus": "^4.9.0",
-    "dayjs": "^1.10.6",
+    "@godaddy/terminus": "^4.10.2",
+    "dayjs": "^1.11.3",
     "dotenv-safe": "^8.2.0",
-    "fast-xml-parser": "^3.19.0",
-    "googleapis": "^83.0.0",
+    "fast-xml-parser": "^4.0.8",
+    "googleapis": "^103.0.0",
     "he": "^1.2.0",
-    "ioredis": "^4.27.7",
-    "mongoose": "^5.13.5",
+    "ioredis": "^5.0.6",
+    "mongoose": "^6.4.0",
     "pubsubhubbub": "^1.0.1",
-    "telegraf": "^4.4.1",
-    "yup": "^0.32.9"
+    "telegraf": "^4.8.5",
+    "yup": "^0.32.11"
   },
   "engines": {
     "node": "14"
