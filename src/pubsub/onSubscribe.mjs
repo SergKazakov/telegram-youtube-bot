@@ -1,5 +1,5 @@
-import { redis } from "../redis"
-import { handleError } from "../utils/handleError"
+import { redis } from "../redis.mjs"
+import { handleError } from "../utils/handleError.mjs"
 
 export const onSubscribe = handleError(async ({ topic, lease }) => {
   const [, channelId] = topic.split("=")

@@ -1,9 +1,9 @@
 import { Telegraf } from "telegraf"
 
-import { getUserMiddleware } from "./getUserMiddleware"
-import { errorHandler } from "./errorHandler"
-import { authMiddleware } from "./authMiddleware"
-import { onSubscribeCommand } from "./onSubscribeCommand"
+import { getUserMiddleware } from "./getUserMiddleware.mjs"
+import { errorHandler } from "./errorHandler.mjs"
+import { authMiddleware } from "./authMiddleware.mjs"
+import { onSubscribeCommand } from "./onSubscribeCommand.mjs"
 
 export const bot = new Telegraf(process.env.BOT_TOKEN)
 

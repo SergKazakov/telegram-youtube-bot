@@ -2,11 +2,10 @@ import { XMLParser } from "fast-xml-parser"
 import he from "he"
 import dayjs from "dayjs"
 
-import { bot } from "../bot"
-import { User } from "../models/user"
-import { Subscription } from "../models/subscription"
-import { redis } from "../redis"
-import { handleError } from "../utils/handleError"
+import { bot } from "../bot/index.mjs"
+import { User, Subscription } from "../models/index.mjs"
+import { redis } from "../redis.mjs"
+import { handleError } from "../utils/handleError.mjs"
 
 export const onFeed = handleError(async ({ topic, feed }) => {
   const [, channelId] = topic.split("=")

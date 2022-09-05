@@ -1,6 +1,6 @@
 import { Markup } from "telegraf"
 
-import { getOauth2Client } from "../google"
+import { getOauth2Client } from "../google.mjs"
 
 export const authMiddleware = async (ctx, next) => {
   if (ctx.state.user) {

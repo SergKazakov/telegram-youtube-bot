@@ -1,6 +1,6 @@
-import { getYoutubeClient } from "../google"
-import { emitEvent } from "../pubsub"
-import { Subscription } from "../models/subscription"
+import { getYoutubeClient } from "../google.mjs"
+import { emitEvent } from "../pubsub/index.mjs"
+import { Subscription } from "../models/index.mjs"
 
 export const onSubscribeCommand = async ctx => {
   const youtube = getYoutubeClient(ctx.state.user.refreshToken)

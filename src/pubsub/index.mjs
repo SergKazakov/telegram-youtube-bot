@@ -2,8 +2,8 @@ import { promisify } from "node:util"
 
 import pubsubhubbub from "pubsubhubbub"
 
-import { onFeed } from "./onFeed"
-import { onSubscribe } from "./onSubscribe"
+import { onFeed } from "./onFeed.mjs"
+import { onSubscribe } from "./onSubscribe.mjs"
 
 export const pubsub = pubsubhubbub.createServer({
   callbackUrl: `${process.env.PUBLIC_URL}/pubsubhubbub`,

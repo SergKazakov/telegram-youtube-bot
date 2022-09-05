@@ -1,9 +1,9 @@
 import http from "node:http"
 
-import { pubsub } from "../pubsub"
-import { bot } from "../bot"
+import { pubsub } from "../pubsub/index.mjs"
+import { bot } from "../bot/index.mjs"
 
-import { oauth2Callback } from "./oauth2Callback"
+import { oauth2Callback } from "./oauth2Callback.mjs"
 
 export const server = http.createServer((req, res) => {
   const { pathname } = new URL(req.url, process.env.PUBLIC_URL)

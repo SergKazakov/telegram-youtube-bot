@@ -2,9 +2,9 @@ import url from "node:url"
 
 import * as yup from "yup"
 
-import { bot } from "../bot"
-import { getOauth2Client } from "../google"
-import { User } from "../models/user"
+import { bot } from "../bot/index.mjs"
+import { getOauth2Client } from "../google.mjs"
+import { User } from "../models/index.mjs"
 
 const handleError = fn => async (req, res) => {
   try {
