@@ -1,12 +1,13 @@
-import { redis } from "../redis.mjs"
-import { handleError } from "../utils/handleError.mjs"
+import { agenda } from "../agenda.mjs"
 
-export const onSubscribe = handleError(async ({ topic, lease }) => {
+export const onSubscribe = async ({ topic, lease }) => {
   const [, channelId] = topic.split("=")
 
-  await redis.setex(
-    `channel_id:${channelId}`,
-    Math.round(lease - Date.now() / 1000),
+  await agenda.cancel({ name: "prolongSubscription", data: channelId })
+
+  await agenda.schedule(
     new Date(lease * 1000),
+    "prolongSubscription",
+    channelId,
   )
-})
+}

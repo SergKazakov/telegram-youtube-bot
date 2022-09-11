@@ -1,35 +1,8 @@
-import mongoose from "mongoose"
 import terminus from "@godaddy/terminus"
-import Redis from "ioredis"
 
 import { bot } from "./bot/index.mjs"
-import { emitEvent } from "./pubsub/index.mjs"
-import { redis } from "./redis.mjs"
 import { server } from "./server/index.mjs"
-import { handleError } from "./utils/handleError.mjs"
-import { User } from "./models/index.mjs"
-
-await redis.config("SET", "notify-keyspace-events", "KEA")
-
-const subscriber = new Redis(process.env.REDIS_URL)
-
-await subscriber.subscribe("__keyevent@0__:expired")
-
-subscriber.on(
-  "message",
-  handleError(async (_, message) => {
-    if (message.startsWith("channel_id")) {
-      const [, channelId] = message.split(":")
-
-      await emitEvent("subscribe")(channelId)
-    }
-  }),
-)
-
-await mongoose.connect(process.env.MONGODB_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+import { mongoClient, chatCollection } from "./mongodb.mjs"
 
 if (process.env.NODE_ENV === "production") {
   const webhookUrl = `${process.env.PUBLIC_URL}/bot-webhook`
@@ -48,20 +21,11 @@ if (process.env.NODE_ENV === "production") {
 terminus.createTerminus(server, {
   healthChecks: {
     async "/healthcheck"() {
-      if (redis.status !== "ready") {
-        throw new Error("Redis is not ready")
-      }
-
-      await User.findOne()
+      await chatCollection.findOne()
     },
   },
   signals: ["SIGINT", "SIGTERM"],
-  onSignal: () =>
-    Promise.all([
-      redis.quit().catch(console.log),
-      subscriber.quit().catch(console.log),
-      mongoose.disconnect().catch(console.log),
-    ]),
+  onSignal: () => mongoClient.close().catch(console.error),
   logger: console.log,
 })
 

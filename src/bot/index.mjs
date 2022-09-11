@@ -1,13 +1,15 @@
 import { Telegraf } from "telegraf"
 
-import { getUserMiddleware } from "./getUserMiddleware.mjs"
-import { errorHandler } from "./errorHandler.mjs"
-import { authMiddleware } from "./authMiddleware.mjs"
-import { onSubscribeCommand } from "./onSubscribeCommand.mjs"
+import { subscribe } from "./subscribe.mjs"
 
 export const bot = new Telegraf(process.env.BOT_TOKEN)
+  .use(async (ctx, next) => {
+    try {
+      await next()
+    } catch (error) {
+      console.log(error)
 
-bot
-  .use(getUserMiddleware)
-  .use(errorHandler)
-  .command("subscribe", authMiddleware, onSubscribeCommand)
+      return ctx.reply("Ooops")
+    }
+  })
+  .command("subscribe", subscribe)

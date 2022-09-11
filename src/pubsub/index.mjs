@@ -9,9 +9,18 @@ export const pubsub = pubsubhubbub.createServer({
   callbackUrl: `${process.env.PUBLIC_URL}/pubsubhubbub`,
 })
 
-pubsub.on("feed", onFeed)
-
-pubsub.on("subscribe", onSubscribe)
+for (const [event, listener] of Object.entries({
+  feed: onFeed,
+  subscribe: onSubscribe,
+})) {
+  pubsub.on(event, async (...args) => {
+    try {
+      await listener(...args)
+    } catch (error) {
+      console.error(error)
+    }
+  })
+}
 
 export const emitEvent = event => channelId =>
   promisify(cb =>

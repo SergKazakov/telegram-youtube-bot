@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "start": "node -r dotenv-safe/config src/index.mjs",
+    "start": "node src/index.mjs",
     "dev": "nodemon --watch src --inspect -r dotenv-safe/config src/index.mjs"
   },
   "eslintConfig": {
@@ -22,12 +22,6 @@
       "unicorn/prevent-abbreviations": "off",
       "unicorn/no-fn-reference-in-iterator": "off",
       "unicorn/no-null": "off",
-      "camelcase": [
-        "error",
-        {
-          "properties": "never"
-        }
-      ],
       "import/order": [
         "error",
         {
@@ -41,7 +35,14 @@
             "^node:"
           ]
         }
-      ]
+      ],
+      "camelcase": [
+        "error",
+        {
+          "properties": "never"
+        }
+      ],
+      "no-await-in-loop": "off"
     }
   },
   "prettier": {
@@ -50,7 +51,7 @@
     "arrowParens": "avoid"
   },
   "devDependencies": {
-    "@arkweid/lefthook": "^0.7.7",
+    "@evilmartians/lefthook-installer": "^1.1.1",
     "eslint": "^8.23.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-xo": "^0.42.0",
@@ -62,18 +63,18 @@
   },
   "dependencies": {
     "@godaddy/terminus": "^4.10.2",
-    "dayjs": "^1.11.3",
+    "agenda": "^4.3.0",
     "dotenv-safe": "^8.2.0",
     "fast-xml-parser": "^4.0.8",
     "googleapis": "^103.0.0",
     "he": "^1.2.0",
-    "ioredis": "^5.0.6",
-    "mongoose": "^6.4.0",
+    "mongodb": "^4.9.1",
     "pubsubhubbub": "^1.0.1",
     "telegraf": "^4.8.5",
     "yup": "^0.32.11"
   },
   "engines": {
-    "node": "14"
+    "node": "14",
+    "npm": "8"
   }
 }

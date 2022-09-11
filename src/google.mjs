@@ -12,8 +12,5 @@ export const getYoutubeClient = refreshToken => {
 
   auth.setCredentials({ refresh_token: refreshToken })
 
-  return googleapis.google.youtube({
-    version: "v3",
-    auth,
-  })
+  return googleapis.google.youtube({ version: "v3", auth })
 }

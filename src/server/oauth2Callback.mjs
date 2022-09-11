@@ -1,46 +1,42 @@
-import url from "node:url"
-
 import * as yup from "yup"
 
 import { bot } from "../bot/index.mjs"
 import { getOauth2Client } from "../google.mjs"
-import { User } from "../models/index.mjs"
-
-const handleError = fn => async (req, res) => {
-  try {
-    await fn(req, res)
-  } catch (error) {
-    res
-      .writeHead(error.name === "ValidationError" ? 400 : error.status || 500, {
-        "Content-Type": "application/json",
-      })
-      .end(JSON.stringify({ message: error.message }))
-  }
-}
+import { chatCollection } from "../mongodb.mjs"
 
 const schema = yup.object().shape({
   code: yup.string().trim().required(),
   state: yup.string().trim().required(),
 })
 
-export const oauth2Callback = handleError(async (req, res) => {
-  const { query } = url.parse(req.url, true)
+export const oauth2Callback = async (req, res) => {
+  try {
+    const { searchParams } = new URL(req.url, process.env.PUBLIC_URL)
 
-  const { code, state } = await schema.validate(query)
+    const { code, state } = await schema.validate(
+      Object.fromEntries(searchParams),
+    )
 
-  const { tokens } = await getOauth2Client().getToken(code)
+    const { tokens } = await getOauth2Client().getToken(code)
 
-  const { userId, chatId } = JSON.parse(Buffer.from(state, "base64").toString())
+    const chatId = Buffer.from(state, "base64").toString()
 
-  await User.updateOne(
-    { userId, chatId },
-    { refreshToken: tokens.refresh_token },
-    { upsert: true },
-  )
+    await chatCollection.updateOne(
+      { _id: chatId },
+      { $set: { refreshToken: tokens.refresh_token } },
+      { upsert: true },
+    )
 
-  await bot.telegram.sendMessage(chatId, "Success")
+    await bot.telegram.sendMessage(chatId, "Success")
 
-  const { username } = await bot.telegram.getMe()
+    const { username } = await bot.telegram.getMe()
 
-  res.writeHead(302, { Location: `https://t.me/${username}` }).end()
-})
+    res.writeHead(302, { Location: `https://t.me/${username}` }).end()
+  } catch (error) {
+    res
+      .writeHead(error instanceof yup.ValidationError ? 400 : 500, {
+        "Content-Type": "application/json",
+      })
+      .end(JSON.stringify({ message: error.message }))
+  }
+}

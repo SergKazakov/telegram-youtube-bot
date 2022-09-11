@@ -8,10 +8,8 @@ import { oauth2Callback } from "./oauth2Callback.mjs"
 export const server = http.createServer((req, res) => {
   const { pathname } = new URL(req.url, process.env.PUBLIC_URL)
 
-  const webhookUrl = "/bot-webhook"
-
-  if (pathname === webhookUrl) {
-    return bot.webhookCallback(webhookUrl)(req, res)
+  if (pathname === "/bot-webhook") {
+    return bot.webhookCallback(pathname)(req, res)
   }
 
   if (pathname === "/pubsubhubbub") {
