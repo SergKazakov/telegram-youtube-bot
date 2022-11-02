@@ -1,7 +1,7 @@
 import http from "node:http"
 
-import { pubsub } from "../pubsub/index.mjs"
 import { bot } from "../bot/index.mjs"
+import { pubsub } from "../pubsub/index.mjs"
 
 import { oauth2Callback } from "./oauth2Callback.mjs"
 

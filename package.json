@@ -13,29 +13,20 @@
       "plugin:prettier/recommended"
     ],
     "rules": {
-      "unicorn/filename-case": [
-        "error",
-        {
-          "case": "camelCase"
-        }
-      ],
+      "unicorn/filename-case": "off",
       "unicorn/prevent-abbreviations": "off",
       "unicorn/no-fn-reference-in-iterator": "off",
       "unicorn/no-null": "off",
       "import/order": [
         "error",
         {
-          "newlines-between": "always"
+          "newlines-between": "always",
+          "alphabetize": {
+            "order": "asc"
+          }
         }
       ],
-      "import/no-unresolved": [
-        "error",
-        {
-          "ignore": [
-            "^node:"
-          ]
-        }
-      ],
+      "import/no-unresolved": "off",
       "camelcase": [
         "error",
         {
@@ -51,30 +42,30 @@
     "arrowParens": "avoid"
   },
   "devDependencies": {
-    "@evilmartians/lefthook-installer": "^1.1.1",
-    "eslint": "^8.23.0",
+    "@evilmartians/lefthook-installer": "^1.1.4",
+    "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-xo": "^0.42.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-unicorn": "^43.0.2",
-    "nodemon": "^2.0.19",
+    "eslint-plugin-unicorn": "^44.0.2",
+    "nodemon": "^2.0.20",
     "prettier": "^2.7.1"
   },
   "dependencies": {
-    "@godaddy/terminus": "^4.10.2",
-    "agenda": "^4.3.0",
+    "@godaddy/terminus": "^4.11.2",
+    "agenda": "^4.4.0",
     "dotenv-safe": "^8.2.0",
-    "fast-xml-parser": "^4.0.8",
-    "googleapis": "^103.0.0",
+    "fast-xml-parser": "^4.0.11",
+    "googleapis": "^109.0.0",
     "he": "^1.2.0",
-    "mongodb": "^4.9.1",
-    "pubsubhubbub": "^1.0.1",
-    "telegraf": "^4.8.5",
+    "mongodb": "^4.11.0",
+    "pubsubhubbub": "^1.0.2",
+    "telegraf": "^4.10.0",
     "yup": "^0.32.11"
   },
   "engines": {
-    "node": "14",
-    "npm": "8"
+    "node": "18",
+    "npm": "9"
   }
 }
