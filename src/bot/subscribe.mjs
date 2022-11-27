@@ -44,9 +44,9 @@ export const subscribe = async ctx => {
       channels.push(channelId)
 
       try {
-        await subscriptionCollection.insertOne({ _id: { channelId, chatId } })
-
         await emitEvent("subscribe")(channelId)
+
+        await subscriptionCollection.insertOne({ _id: { channelId, chatId } })
       } catch {}
     }
 
