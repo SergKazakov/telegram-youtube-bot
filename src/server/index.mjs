@@ -8,7 +8,7 @@ import { oauth2Callback } from "./oauth2Callback.mjs"
 export const server = http.createServer((req, res) => {
   const { pathname } = new URL(req.url, process.env.PUBLIC_URL)
 
-  if (pathname === "/bot-webhook") {
+  if (pathname === `/${process.env.BOT_TOKEN}`) {
     return bot.webhookCallback(pathname)(req, res)
   }
 

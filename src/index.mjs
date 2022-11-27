@@ -5,7 +5,7 @@ import { mongoClient, chatCollection } from "./mongodb.mjs"
 import { server } from "./server/index.mjs"
 
 if (process.env.NODE_ENV === "production") {
-  const webhookUrl = `${process.env.PUBLIC_URL}/bot-webhook`
+  const webhookUrl = `${process.env.PUBLIC_URL}/${process.env.BOT_TOKEN}`
 
   const { url: currentWebhookUrl } = await bot.telegram.getWebhookInfo()
 
