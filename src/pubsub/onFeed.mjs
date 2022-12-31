@@ -39,6 +39,10 @@ export const onFeed = async ({ topic, feed }) => {
     return
   }
 
+  if (title.includes("#shorts")) {
+    return
+  }
+
   const subscriptions = await subscriptionCollection
     .find({ "_id.channelId": channelId })
     .toArray()
