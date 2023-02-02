@@ -2,7 +2,7 @@ import { XMLParser } from "fast-xml-parser"
 import he from "he"
 
 import { bot } from "../bot/index.mjs"
-import { videoCollection, subscriptionCollection } from "../mongodb.mjs"
+import { subscriptionCollection, videoCollection } from "../mongodb.mjs"
 
 export const onFeed = async ({ topic, feed }) => {
   const [, channelId] = topic.split("=")

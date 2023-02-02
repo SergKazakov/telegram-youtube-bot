@@ -1,11 +1,15 @@
 {
   "private": true,
   "scripts": {
-    "start": "node src/index.mjs",
-    "dev": "node --watch --inspect -r dotenv-safe/config src/index.mjs"
+    "dev": "node --watch --inspect -r dotenv-safe/config src/index.mjs",
+    "start": "node src/index.mjs"
+  },
+  "prettier": {
+    "arrowParens": "avoid",
+    "semi": false,
+    "trailingComma": "all"
   },
   "eslintConfig": {
-    "root": true,
     "extends": [
       "plugin:import/recommended",
       "xo",
@@ -13,10 +17,20 @@
       "plugin:prettier/recommended"
     ],
     "rules": {
-      "unicorn/filename-case": "off",
-      "unicorn/prevent-abbreviations": "off",
-      "unicorn/no-fn-reference-in-iterator": "off",
-      "unicorn/no-null": "off",
+      "camelcase": [
+        "error",
+        {
+          "properties": "never"
+        }
+      ],
+      "no-await-in-loop": "off",
+      "sort-imports": [
+        "error",
+        {
+          "ignoreDeclarationSort": true
+        }
+      ],
+      "import/no-unresolved": "off",
       "import/order": [
         "error",
         {
@@ -26,30 +40,12 @@
           }
         }
       ],
-      "import/no-unresolved": "off",
-      "camelcase": [
-        "error",
-        {
-          "properties": "never"
-        }
-      ],
-      "no-await-in-loop": "off"
-    }
-  },
-  "prettier": {
-    "trailingComma": "all",
-    "semi": false,
-    "arrowParens": "avoid"
-  },
-  "devDependencies": {
-    "@evilmartians/lefthook-installer": "^1.2.7",
-    "eslint": "^8.32.0",
-    "eslint-config-prettier": "^8.6.0",
-    "eslint-config-xo": "^0.43.1",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-unicorn": "^45.0.2",
-    "prettier": "^2.8.3"
+      "unicorn/filename-case": "off",
+      "unicorn/no-fn-reference-in-iterator": "off",
+      "unicorn/no-null": "off",
+      "unicorn/prevent-abbreviations": "off"
+    },
+    "root": true
   },
   "dependencies": {
     "@godaddy/terminus": "^4.11.2",
@@ -62,6 +58,16 @@
     "pubsubhubbub": "^1.0.2",
     "telegraf": "^4.11.2",
     "yup": "^0.32.11"
+  },
+  "devDependencies": {
+    "@evilmartians/lefthook-installer": "^1.2.7",
+    "eslint": "^8.32.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-config-xo": "^0.43.1",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-unicorn": "^45.0.2",
+    "prettier": "^2.8.3"
   },
   "engines": {
     "node": "^18",
