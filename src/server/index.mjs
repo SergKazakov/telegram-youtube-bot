@@ -1,16 +1,12 @@
-import http from "node:http"
+import { createServer } from "node:http"
 
-import { bot } from "../bot/index.mjs"
+import { webhook } from "../bot/index.mjs"
 import { pubsub } from "../pubsub/index.mjs"
 
 import { oauth2Callback } from "./oauth2Callback.mjs"
 
-export const server = http.createServer((req, res) => {
+export const server = createServer((req, res) => {
   const { pathname } = new URL(req.url, process.env.PUBLIC_URL)
-
-  if (pathname === `/${process.env.BOT_TOKEN}`) {
-    return bot.webhookCallback(pathname)(req, res)
-  }
 
   if (pathname === "/pubsubhubbub") {
     return pubsub.listener()(req, res)
@@ -20,5 +16,5 @@ export const server = http.createServer((req, res) => {
     return oauth2Callback(req, res)
   }
 
-  res.writeHead(404).end()
+  webhook(req, res)
 })
