@@ -4,6 +4,27 @@ import { getOauth2Client, getYoutubeClient } from "../google.mjs"
 import { chatCollection, subscriptionCollection } from "../mongodb.mjs"
 import { emitEvent } from "../pubsub/index.mjs"
 
+async function* getSubscriptions(refreshToken) {
+  const youtubeClient = getYoutubeClient(refreshToken)
+
+  let pageToken
+
+  do {
+    const {
+      data: { items, nextPageToken },
+    } = await youtubeClient.subscriptions.list({
+      ...(pageToken && { pageToken }),
+      mine: true,
+      maxResults: 50,
+      part: "snippet",
+    })
+
+    yield items
+
+    pageToken = nextPageToken
+  } while (pageToken)
+}
+
 export const subscribe = async ctx => {
   const chatId = String(ctx.chat.id)
 
@@ -22,25 +43,14 @@ export const subscribe = async ctx => {
     )
   }
 
-  const youtube = getYoutubeClient(chat.refreshToken)
-
   const channels = []
 
-  let nextPageToken
-
-  do {
-    const { data } = await youtube.subscriptions.list({
-      mine: true,
-      maxResults: 50,
-      part: "snippet",
-      ...(nextPageToken && { pageToken: nextPageToken }),
-    })
-
+  for await (const items of getSubscriptions(chat.refreshToken)) {
     for (const {
       snippet: {
         resourceId: { channelId },
       },
-    } of data.items) {
+    } of items) {
       channels.push(channelId)
 
       try {
@@ -49,9 +59,7 @@ export const subscribe = async ctx => {
         await subscriptionCollection.insertOne({ _id: { channelId, chatId } })
       } catch {}
     }
-
-    nextPageToken = data.nextPageToken
-  } while (nextPageToken)
+  }
 
   if (channels.length > 0) {
     await subscriptionCollection.deleteMany({
