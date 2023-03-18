@@ -43,19 +43,15 @@ export const onFeed = async ({ topic, feed }) => {
     return
   }
 
-  const subscriptions = await subscriptionCollection
-    .find({ "_id.channelId": channelId })
-    .toArray()
+  const cursor = await subscriptionCollection.find({
+    "_id.channelId": channelId,
+  })
 
-  await Promise.all(
-    subscriptions.map(x =>
-      bot.telegram.sendMessage(
-        x._id.chatId,
-        `[${name} - ${title}](${
-          Array.isArray(link) ? link[0].href : link.href
-        })`,
-        { parse_mode: "Markdown" },
-      ),
-    ),
-  )
+  for await (const x of cursor) {
+    await bot.telegram.sendMessage(
+      x._id.chatId,
+      `[${name} - ${title}](${Array.isArray(link) ? link[0].href : link.href})`,
+      { parse_mode: "Markdown" },
+    )
+  }
 }
