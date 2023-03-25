@@ -22,10 +22,10 @@ for (const [event, listener] of Object.entries({
   })
 }
 
-export const emitEvent = event => channelId =>
+export const subscribeToChannel = id =>
   promisify(cb =>
-    pubsub[event](
-      `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${channelId}`,
+    pubsub.subscribe(
+      `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${id}`,
       "https://pubsubhubbub.appspot.com",
       cb,
     ),

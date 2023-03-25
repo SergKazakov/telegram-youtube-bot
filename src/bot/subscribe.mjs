@@ -2,7 +2,7 @@ import { Markup } from "telegraf"
 
 import { getOauth2Client, getYoutubeClient } from "../google.mjs"
 import { chatCollection, subscriptionCollection } from "../mongodb.mjs"
-import { emitEvent } from "../pubsub/index.mjs"
+import { subscribeToChannel } from "../pubsub/index.mjs"
 
 async function* getSubscriptions(refreshToken) {
   const youtubeClient = getYoutubeClient(refreshToken)
@@ -54,7 +54,7 @@ export const subscribe = async ctx => {
       channels.push(channelId)
 
       try {
-        await emitEvent("subscribe")(channelId)
+        await subscribeToChannel(channelId)
 
         await subscriptionCollection.insertOne({ _id: { channelId, chatId } })
       } catch {}
