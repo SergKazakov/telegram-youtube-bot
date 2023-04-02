@@ -3,10 +3,15 @@ import { createServer } from "node:http"
 import { webhook } from "../bot/index.mjs"
 import { pubsub } from "../pubsub/index.mjs"
 
+import { healthCheck } from "./healthCheck.mjs"
 import { oauth2Callback } from "./oauth2Callback.mjs"
 
 export const server = createServer((req, res) => {
   const { pathname } = new URL(req.url, process.env.PUBLIC_URL)
+
+  if (req.method === "GET" && pathname === "/healthcheck") {
+    return healthCheck(req, res)
+  }
 
   if (pathname === "/pubsubhubbub") {
     return pubsub.listener()(req, res)

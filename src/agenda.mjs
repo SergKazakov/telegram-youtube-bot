@@ -1,4 +1,4 @@
-import Agenda from "agenda"
+import { Agenda } from "agenda"
 
 import { subscriptionCollection } from "./mongodb.mjs"
 import { subscribeToChannel } from "./pubsub/index.mjs"

@@ -16,7 +16,7 @@ async function* getSubscriptions(refreshToken) {
       ...(pageToken && { pageToken }),
       mine: true,
       maxResults: 50,
-      part: "snippet",
+      part: ["snippet"],
     })
 
     yield items
