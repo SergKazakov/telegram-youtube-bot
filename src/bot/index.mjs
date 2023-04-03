@@ -7,7 +7,7 @@ export const bot = new Telegraf(process.env.BOT_TOKEN)
     try {
       await next()
     } catch (error) {
-      console.log(error)
+      console.error(error)
 
       return ctx.reply("Ooops")
     }

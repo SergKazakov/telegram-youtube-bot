@@ -1,6 +1,6 @@
 import googleapis from "googleapis"
 
-export const getOauth2Client = () =>
+export const getOAuth2Client = () =>
   new googleapis.google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -8,7 +8,7 @@ export const getOauth2Client = () =>
   )
 
 export const getYoutubeClient = refreshToken => {
-  const auth = getOauth2Client()
+  const auth = getOAuth2Client()
 
   auth.setCredentials({ refresh_token: refreshToken })
 

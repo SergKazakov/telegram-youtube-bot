@@ -4,8 +4,14 @@ import he from "he"
 import { bot } from "../bot/index.mjs"
 import { subscriptionCollection, videoCollection } from "../mongodb.mjs"
 
-export const onFeed = async ({ topic, feed }) => {
-  const [, channelId] = topic.split("=")
+const end = res => res.writeHead(204).end()
+
+export const onFeed = async (req, res) => {
+  let rawBody = ""
+
+  for await (const chunk of req) rawBody += chunk
+
+  console.log(rawBody)
 
   const message = new XMLParser({
     attributeNamePrefix: "",
@@ -14,19 +20,17 @@ export const onFeed = async ({ topic, feed }) => {
     attributeValueProcessor: (_, value) =>
       he.decode(value, { isAttributeValue: true }),
     tagValueProcessor: (_, value) => he.decode(value),
-  }).parse(feed.toString())
-
-  console.log(JSON.stringify(message, null, 2))
+  }).parse(rawBody)
 
   if (!message.feed?.entry) {
-    return
+    return end(res)
   }
 
   const {
     feed: {
       entry: {
-        link,
         "yt:videoId": videoId,
+        "yt:channelId": channelId,
         title,
         author: { name },
       },
@@ -36,11 +40,11 @@ export const onFeed = async ({ topic, feed }) => {
   try {
     await videoCollection.insertOne({ _id: videoId })
   } catch {
-    return
+    return end(res)
   }
 
   if (title.includes("#shorts")) {
-    return
+    return end(res)
   }
 
   const cursor = await subscriptionCollection.find({
@@ -50,8 +54,10 @@ export const onFeed = async ({ topic, feed }) => {
   for await (const x of cursor) {
     await bot.telegram.sendMessage(
       x._id.chatId,
-      `[${name} - ${title}](${Array.isArray(link) ? link[0].href : link.href})`,
+      `[${name} - ${title}](https://www.youtube.com/watch?v=${videoId})`,
       { parse_mode: "Markdown" },
     )
   }
+
+  end(res)
 }

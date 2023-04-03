@@ -1,25 +1,38 @@
 import { createServer } from "node:http"
 
+import { ValidationError } from "yup"
+
 import { webhook } from "../bot/index.mjs"
-import { pubsub } from "../pubsub/index.mjs"
 
+import { confirmSubscription } from "./confirmSubscription.mjs"
 import { healthCheck } from "./healthCheck.mjs"
-import { oauth2Callback } from "./oauth2Callback.mjs"
+import { oAuth2Callback } from "./oAuth2Callback.mjs"
+import { onFeed } from "./onFeed.mjs"
 
-export const server = createServer((req, res) => {
-  const { pathname } = new URL(req.url, process.env.PUBLIC_URL)
+export const server = createServer(async (req, res) => {
+  try {
+    const { pathname } = new URL(req.url, process.env.PUBLIC_URL)
 
-  if (req.method === "GET" && pathname === "/healthcheck") {
-    return healthCheck(req, res)
+    if (pathname === "/healthcheck") {
+      return await healthCheck(req, res)
+    }
+
+    if (req.method === "GET" && pathname === "/pubsubhubbub") {
+      return await confirmSubscription(req, res)
+    }
+
+    if (req.method === "POST" && pathname === "/pubsubhubbub") {
+      return await onFeed(req, res)
+    }
+
+    if (req.method === "GET" && pathname === "/oauth2callback") {
+      return await oAuth2Callback(req, res)
+    }
+
+    await webhook(req, res)
+  } catch (error) {
+    console.error(error)
+
+    res.writeHead(error instanceof ValidationError ? 400 : 500).end()
   }
-
-  if (pathname === "/pubsubhubbub") {
-    return pubsub.listener()(req, res)
-  }
-
-  if (req.method === "GET" && pathname === "/oauth2callback") {
-    return oauth2Callback(req, res)
-  }
-
-  webhook(req, res)
 })

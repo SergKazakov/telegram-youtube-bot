@@ -1,7 +1,7 @@
-import { Agenda } from "agenda"
+import { Agenda } from "@hokify/agenda"
 
 import { subscriptionCollection } from "./mongodb.mjs"
-import { subscribeToChannel } from "./pubsub/index.mjs"
+import { subscribeToChannel } from "./utils.mjs"
 
 export const agenda = new Agenda({ db: { address: process.env.MONGODB_URL } })
 
