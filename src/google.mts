@@ -7,7 +7,7 @@ export const getOAuth2Client = () =>
     `${process.env.PUBLIC_URL}/oauth2callback`,
   )
 
-export const getYoutubeClient = refreshToken => {
+export const getYoutubeClient = (refreshToken: string) => {
   const auth = getOAuth2Client()
 
   auth.setCredentials({ refresh_token: refreshToken })

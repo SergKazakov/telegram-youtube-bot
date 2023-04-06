@@ -1,21 +1,24 @@
+import { ServerResponse } from "node:http"
+
 import * as yup from "yup"
 
 import { agenda } from "../agenda.mjs"
 import { parseSearchParams } from "../utils.mjs"
 
-const schema = yup.object({
-  "hub.challenge": yup.string().trim().required(),
-  "hub.lease_seconds": yup.number().required(),
-  "hub.mode": yup.mixed().oneOf(["subscribe"]),
-  "hub.topic": yup.string().trim().required(),
-})
-
-export const confirmSubscription = async (req, res) => {
+export const confirmSubscription = async (res: ServerResponse) => {
   const {
     "hub.challenge": challenge,
     "hub.lease_seconds": leaseSeconds,
     "hub.topic": topic,
-  } = await schema.validate(parseSearchParams(req))
+  } = await parseSearchParams(
+    yup.object({
+      "hub.challenge": yup.string().trim().required(),
+      "hub.lease_seconds": yup.number().required(),
+      "hub.mode": yup.string().oneOf(["subscribe"]).required(),
+      "hub.topic": yup.string().trim().required(),
+    }),
+    res.req,
+  )
 
   const [, channelId] = topic.split("=")
 

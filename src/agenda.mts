@@ -3,11 +3,13 @@ import { Agenda } from "@hokify/agenda"
 import { subscriptionCollection } from "./mongodb.mjs"
 import { subscribeToChannel } from "./utils.mjs"
 
-export const agenda = new Agenda({ db: { address: process.env.MONGODB_URL } })
+export const agenda = new Agenda({
+  db: { address: process.env.MONGODB_URL as string },
+})
 
 agenda.on("fail", error => console.error(error))
 
-agenda.define("prolongSubscription", async job => {
+agenda.define<string>("prolongSubscription", async job => {
   const channelId = job.attrs.data
 
   const subscription = await subscriptionCollection.findOne({

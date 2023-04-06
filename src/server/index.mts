@@ -11,22 +11,22 @@ import { onFeed } from "./onFeed.mjs"
 
 export const server = createServer(async (req, res) => {
   try {
-    const { pathname } = new URL(req.url, process.env.PUBLIC_URL)
+    const { pathname } = new URL(req.url as string, process.env.PUBLIC_URL)
 
     if (pathname === "/healthcheck") {
-      return await healthCheck(req, res)
+      return await healthCheck(res)
     }
 
     if (req.method === "GET" && pathname === "/pubsubhubbub") {
-      return await confirmSubscription(req, res)
+      return await confirmSubscription(res)
     }
 
     if (req.method === "POST" && pathname === "/pubsubhubbub") {
-      return await onFeed(req, res)
+      return await onFeed(res)
     }
 
     if (req.method === "GET" && pathname === "/oauth2callback") {
-      return await oAuth2Callback(req, res)
+      return await oAuth2Callback(res)
     }
 
     await webhook(req, res)

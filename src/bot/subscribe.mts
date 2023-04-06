@@ -1,13 +1,14 @@
-import { Markup } from "telegraf"
+import { youtube_v3 as youtubeV3 } from "googleapis"
+import { Context, Markup, Middleware } from "telegraf"
 
 import { getOAuth2Client, getYoutubeClient } from "../google.mjs"
 import { chatCollection, subscriptionCollection } from "../mongodb.mjs"
 import { subscribeToChannel } from "../utils.mjs"
 
-async function* getSubscriptions(refreshToken) {
+async function* getSubscriptions(refreshToken: string) {
   const youtubeClient = getYoutubeClient(refreshToken)
 
-  let pageToken
+  let pageToken: youtubeV3.Schema$SubscriptionListResponse["nextPageToken"]
 
   do {
     const {
@@ -25,7 +26,7 @@ async function* getSubscriptions(refreshToken) {
   } while (pageToken)
 }
 
-export const subscribe = async ctx => {
+export const subscribe: Middleware<Context> = async ctx => {
   const chatId = String(ctx.chat?.id)
 
   const chat = await chatCollection.findOne({ _id: chatId })
@@ -43,7 +44,7 @@ export const subscribe = async ctx => {
     )
   }
 
-  const channels = []
+  const channels: string[] = []
 
   for await (const subscriptions of getSubscriptions(chat.refreshToken)) {
     for (const subscription of subscriptions) {
