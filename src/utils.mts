@@ -1,5 +1,6 @@
 import { IncomingMessage } from "node:http"
 
+import { auth, youtube } from "@googleapis/youtube"
 import { AnySchema } from "yup"
 
 export const parseSearchParams = <T extends AnySchema>(
@@ -11,6 +12,21 @@ export const parseSearchParams = <T extends AnySchema>(
       new URL(req.url as string, process.env.PUBLIC_URL).searchParams,
     ),
   )
+
+export const getOAuth2Client = () =>
+  new auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    `${process.env.PUBLIC_URL}/oauth2callback`,
+  )
+
+export const getYoutubeClient = (refreshToken: string) => {
+  const auth = getOAuth2Client()
+
+  auth.setCredentials({ refresh_token: refreshToken })
+
+  return youtube({ version: "v3", auth })
+}
 
 export const subscribeToChannel = (channelId: string) =>
   fetch("https://pubsubhubbub.appspot.com", {

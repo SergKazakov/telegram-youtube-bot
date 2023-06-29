@@ -3,9 +3,8 @@ import { ServerResponse } from "node:http"
 import * as yup from "yup"
 
 import { bot } from "../bot/index.mjs"
-import { getOAuth2Client } from "../google.mjs"
 import { chatCollection } from "../mongodb.mjs"
-import { parseSearchParams } from "../utils.mjs"
+import { getOAuth2Client, parseSearchParams } from "../utils.mjs"
 
 export const oAuth2Callback = async (res: ServerResponse) => {
   const { code, state } = await parseSearchParams(
