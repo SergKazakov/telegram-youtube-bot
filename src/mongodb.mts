@@ -1,10 +1,8 @@
 import { MongoClient } from "mongodb"
 
-export const mongoClient = await MongoClient.connect(
-  process.env.MONGODB_URL as string,
-)
+const mongoClient = await MongoClient.connect(process.env.MONGODB_URL as string)
 
-export const db = mongoClient.db()
+const db = mongoClient.db()
 
 export const chatCollection = db.collection<{
   _id: string
