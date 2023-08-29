@@ -6,8 +6,7 @@
   },
   "prettier": {
     "arrowParens": "avoid",
-    "semi": false,
-    "trailingComma": "all"
+    "semi": false
   },
   "eslintConfig": {
     "extends": [
@@ -32,6 +31,12 @@
           "ignoreDeclarationSort": true
         }
       ],
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        {
+          "fixStyle": "inline-type-imports"
+        }
+      ],
       "import/no-unresolved": "off",
       "import/order": [
         "error",
@@ -53,30 +58,29 @@
     "dist"
   ],
   "dependencies": {
-    "@googleapis/youtube": "^10.0.0",
+    "@googleapis/youtube": "^11.0.1",
     "@hokify/agenda": "^6.3.0",
-    "esbuild": "^0.18.10",
-    "fast-xml-parser": "^4.2.5",
-    "glob": "^10.3.1",
+    "esbuild": "^0.19.2",
+    "fast-xml-parser": "^4.2.7",
     "mongodb": "^5.6.0",
     "telegraf": "^4.12.2",
     "yup": "^1.2.0"
   },
   "devDependencies": {
-    "@evilmartians/lefthook-installer": "^1.4.3",
-    "@types/node": "^20.3.2",
-    "@typescript-eslint/eslint-plugin": "^5.60.1",
-    "@typescript-eslint/parser": "^5.60.1",
+    "@evilmartians/lefthook-installer": "^1.4.9",
+    "@types/node": "^20.5.7",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
     "dotenv-safe": "^8.2.0",
-    "eslint": "^8.43.0",
-    "eslint-config-prettier": "^8.8.0",
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-config-xo": "^0.43.1",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-prettier": "^4.2.1",
-    "eslint-plugin-unicorn": "^47.0.0",
-    "prettier": "^2.8.8",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-prettier": "^5.0.0",
+    "eslint-plugin-unicorn": "^48.0.1",
+    "prettier": "^3.0.2",
     "tsm": "^2.3.0",
-    "typescript": "^5.1.6"
+    "typescript": "^5.2.2"
   },
   "engines": {
     "node": "^18",

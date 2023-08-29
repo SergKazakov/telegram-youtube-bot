@@ -1,7 +1,7 @@
-import { IncomingMessage } from "node:http"
+import { type IncomingMessage } from "node:http"
 
 import { auth, youtube } from "@googleapis/youtube"
-import { AnySchema } from "yup"
+import { type AnySchema } from "yup"
 
 export const parseSearchParams = <T extends AnySchema>(
   schema: T,

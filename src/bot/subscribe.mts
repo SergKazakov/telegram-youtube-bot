@@ -1,5 +1,5 @@
-import { youtube_v3 as youtubeV3 } from "@googleapis/youtube"
-import { Context, Markup, Middleware } from "telegraf"
+import { type youtube_v3 as youtubeV3 } from "@googleapis/youtube"
+import { type Context, Markup, type Middleware } from "telegraf"
 
 import { chatCollection, subscriptionCollection } from "../mongodb.mjs"
 import {

@@ -1,4 +1,4 @@
-import { ServerResponse } from "node:http"
+import { type ServerResponse } from "node:http"
 
 import * as yup from "yup"
 
