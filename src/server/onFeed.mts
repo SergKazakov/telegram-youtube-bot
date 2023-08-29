@@ -47,7 +47,12 @@ export const onFeed = async (res: ServerResponse) => {
     return res.end()
   }
 
-  if (title.includes("#shorts")) {
+  const { status } = await fetch(`https://www.youtube.com/shorts/${videoId}`, {
+    method: "HEAD",
+    redirect: "manual",
+  })
+
+  if (status === 200) {
     return res.end()
   }
 
