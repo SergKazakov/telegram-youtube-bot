@@ -24,6 +24,7 @@
           "properties": "never"
         }
       ],
+      "capitalized-comments": "off",
       "no-await-in-loop": "off",
       "sort-imports": [
         "error",
@@ -59,7 +60,7 @@
   ],
   "dependencies": {
     "@googleapis/youtube": "^11.0.1",
-    "@hokify/agenda": "^6.3.0",
+    "croner": "^7.0.2",
     "esbuild": "^0.19.2",
     "fast-xml-parser": "^4.2.7",
     "mongodb": "^5.6.0",

@@ -28,7 +28,7 @@ export const getYoutubeClient = (refreshToken: string) => {
   return youtube({ version: "v3", auth })
 }
 
-export const subscribeToChannel = (channelId: string) =>
+export const subscribeToChannel = (id: string) =>
   fetch("https://pubsubhubbub.appspot.com", {
     method: "POST",
     body: new URLSearchParams([
@@ -36,7 +36,7 @@ export const subscribeToChannel = (channelId: string) =>
       ["hub.mode", "subscribe"],
       [
         "hub.topic",
-        `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${channelId}`,
+        `https://www.youtube.com/xml/feeds/videos.xml?channel_id=${id}`,
       ],
       ["hub.verify", "async"],
     ]),
