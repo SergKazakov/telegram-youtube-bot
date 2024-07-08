@@ -1,89 +1,39 @@
 {
   "private": true,
   "scripts": {
-    "dev": "tsm --watch --inspect --env-file=.env src/index.mts",
-    "start": "node ./build.mjs && node dist/index.mjs"
+    "dev": "tsx --watch --inspect --env-file=.env src/index.mts",
+    "start": "node ./build.mjs && node --env-file=.env dist/index.mjs"
   },
   "prettier": {
     "arrowParens": "avoid",
     "semi": false
   },
-  "eslintConfig": {
-    "extends": [
-      "plugin:import/recommended",
-      "plugin:import/typescript",
-      "xo",
-      "plugin:unicorn/recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:prettier/recommended"
-    ],
-    "rules": {
-      "camelcase": [
-        "error",
-        {
-          "properties": "never"
-        }
-      ],
-      "capitalized-comments": "off",
-      "no-await-in-loop": "off",
-      "sort-imports": [
-        "error",
-        {
-          "ignoreDeclarationSort": true
-        }
-      ],
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        {
-          "fixStyle": "inline-type-imports"
-        }
-      ],
-      "import/no-unresolved": "off",
-      "import/order": [
-        "error",
-        {
-          "newlines-between": "always",
-          "alphabetize": {
-            "order": "asc"
-          }
-        }
-      ],
-      "unicorn/filename-case": "off",
-      "unicorn/no-fn-reference-in-iterator": "off",
-      "unicorn/no-null": "off",
-      "unicorn/prevent-abbreviations": "off"
-    },
-    "root": true
-  },
-  "eslintIgnore": [
-    "dist"
-  ],
   "dependencies": {
-    "@googleapis/youtube": "^13.0.0",
-    "croner": "^8.0.0",
-    "esbuild": "^0.20.0",
-    "fast-xml-parser": "^4.3.3",
-    "mongodb": "^6.3.0",
-    "telegraf": "^4.15.3",
-    "yup": "^1.3.3"
+    "@googleapis/youtube": "^19.0.0",
+    "croner": "^8.1.0",
+    "esbuild": "^0.23.0",
+    "fast-xml-parser": "^4.4.1",
+    "mongodb": "^6.8.0",
+    "telegraf": "^4.16.3",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
-    "@evilmartians/lefthook-installer": "^1.6.1",
-    "@types/node": "^20.11.9",
-    "@typescript-eslint/eslint-plugin": "^6.19.1",
-    "@typescript-eslint/parser": "^6.19.1",
-    "eslint": "^8.56.0",
+    "@eslint/js": "^9.8.0",
+    "@evilmartians/lefthook-installer": "^1.7.9",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.8.0",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-config-xo": "^0.43.1",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-prettier": "^5.1.3",
-    "eslint-plugin-unicorn": "^50.0.1",
-    "prettier": "^3.2.4",
-    "tsm": "^2.3.0",
-    "typescript": "^5.3.3"
+    "eslint-config-xo": "^0.45.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-unicorn": "^55.0.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.0.0-alpha.54"
   },
   "engines": {
     "node": "^20",
-    "npm": "^9"
+    "npm": "^10"
   }
 }

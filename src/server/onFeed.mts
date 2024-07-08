@@ -1,4 +1,5 @@
 import { type ServerResponse } from "node:http"
+import { text } from "node:stream/consumers"
 
 import { XMLParser } from "fast-xml-parser"
 import { TelegramError } from "telegraf"
@@ -28,9 +29,7 @@ const schema = yup.object({
 })
 
 export const onFeed = async (res: ServerResponse) => {
-  let rawBody = ""
-
-  for await (const chunk of res.req) rawBody += chunk
+  const rawBody = await text(res.req)
 
   console.log(rawBody)
 

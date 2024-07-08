@@ -3,7 +3,6 @@ import { createServer } from "node:http"
 import { ValidationError } from "yup"
 
 import { webhook } from "../bot/index.mjs"
-
 import { confirmSubscription } from "./confirmSubscription.mjs"
 import { healthCheck } from "./healthCheck.mjs"
 import { oAuth2Callback } from "./oAuth2Callback.mjs"
