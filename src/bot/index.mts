@@ -13,8 +13,3 @@ export const bot = new Telegraf(process.env.BOT_TOKEN as string)
     }
   })
   .command("subscribe", subscribe)
-
-export const webhook = await bot.createWebhook({
-  domain: process.env.PUBLIC_URL as string,
-  allowed_updates: [],
-})
