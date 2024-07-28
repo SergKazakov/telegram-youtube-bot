@@ -2,7 +2,6 @@ import { createServer } from "node:http"
 
 import { ValidationError } from "yup"
 
-import { webhook } from "../bot/index.mjs"
 import { confirmSubscription } from "./confirmSubscription.mjs"
 import { healthCheck } from "./healthCheck.mjs"
 import { oAuth2Callback } from "./oAuth2Callback.mjs"
@@ -28,7 +27,7 @@ export const server = createServer(async (req, res) => {
       return await oAuth2Callback(res)
     }
 
-    await webhook(req, res)
+    res.writeHead(404).end()
   } catch (error) {
     console.error(error)
 

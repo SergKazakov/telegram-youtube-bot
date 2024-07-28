@@ -1,5 +1,6 @@
 import { Cron as cron } from "croner"
 
+import { bot } from "./bot/index.mjs"
 import { subscriptionCollection } from "./mongodb.mjs"
 import { server } from "./server/index.mjs"
 import { subscribeToChannel } from "./utils.mjs"
@@ -15,3 +16,5 @@ cron("0 0 0 * * *", { catch: error => console.error(error) }, async () => {
     await subscribeToChannel(x._id)
   }
 })
+
+await bot.launch({ allowedUpdates: [] })
