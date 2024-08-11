@@ -1,18 +1,18 @@
 import js from "@eslint/js"
-import xo from "eslint-config-xo"
-import prettier from "eslint-plugin-prettier/recommended"
-import simpleImportSort from "eslint-plugin-simple-import-sort"
-import unicorn from "eslint-plugin-unicorn"
-import tseslint from "typescript-eslint"
+import eslintConfigXo from "eslint-config-xo"
+import eslintPluginPrettier from "eslint-plugin-prettier/recommended"
+import eslintPluginSimpleImportSort from "eslint-plugin-simple-import-sort"
+import eslintPluginUnicorn from "eslint-plugin-unicorn"
+import typescriptEslint from "typescript-eslint"
 
-export default tseslint.config(
+export default typescriptEslint.config(
   { ignores: ["dist/"] },
   js.configs.recommended,
-  { rules: xo.rules },
-  unicorn.configs["flat/recommended"],
-  { plugins: { "simple-import-sort": simpleImportSort } },
-  ...tseslint.configs.recommended,
-  prettier,
+  { rules: eslintConfigXo.rules },
+  eslintPluginUnicorn.configs["flat/recommended"],
+  { plugins: { "simple-import-sort": eslintPluginSimpleImportSort } },
+  ...typescriptEslint.configs.recommended,
+  eslintPluginPrettier,
   {
     rules: {
       camelcase: ["error", { properties: "never" }],

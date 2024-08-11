@@ -2,7 +2,7 @@ import { type ServerResponse } from "node:http"
 
 import * as yup from "yup"
 
-import { parseSearchParams } from "../utils.mjs"
+import { parseSearchParams } from "../utils.mts"
 
 export const confirmSubscription = async (res: ServerResponse) => {
   const { "hub.challenge": challenge } = await parseSearchParams(

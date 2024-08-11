@@ -1,6 +1,6 @@
 import { type ServerResponse } from "node:http"
 
-import { chatCollection } from "../mongodb.mjs"
+import { chatCollection } from "../mongodb.mts"
 
 export const healthCheck = async (res: ServerResponse) => {
   const statusCode = await chatCollection

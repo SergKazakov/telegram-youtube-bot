@@ -6,4 +6,4 @@ pre-commit:
       run: npx eslint --fix --cache {staged_files} && git add {staged_files}
     tsc:
       glob: "*.mts"
-      run: npx tsc --noEmit
+      run: npx tsc

@@ -2,10 +2,10 @@ import { createServer } from "node:http"
 
 import { ValidationError } from "yup"
 
-import { confirmSubscription } from "./confirmSubscription.mjs"
-import { healthCheck } from "./healthCheck.mjs"
-import { oAuth2Callback } from "./oAuth2Callback.mjs"
-import { onFeed } from "./onFeed.mjs"
+import { confirmSubscription } from "./confirmSubscription.mts"
+import { healthCheck } from "./healthCheck.mts"
+import { oAuth2Callback } from "./oAuth2Callback.mts"
+import { onFeed } from "./onFeed.mts"
 
 export const server = createServer(async (req, res) => {
   try {
