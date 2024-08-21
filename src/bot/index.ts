@@ -1,6 +1,6 @@
 import { Telegraf } from "telegraf"
 
-import { subscribe } from "./subscribe.mts"
+import { subscribe } from "./subscribe.ts"
 
 export const bot = new Telegraf(process.env.BOT_TOKEN as string)
   .use(async (ctx, next) => {

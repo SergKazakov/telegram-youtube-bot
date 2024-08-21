@@ -1,9 +1,9 @@
 import { Cron as cron } from "croner"
 
-import { bot } from "./bot/index.mts"
-import { subscriptionCollection } from "./mongodb.mts"
-import { server } from "./server/index.mts"
-import { subscribeToChannel } from "./utils.mts"
+import { bot } from "./bot/index.ts"
+import { subscriptionCollection } from "./mongodb.ts"
+import { server } from "./server/index.ts"
+import { subscribeToChannel } from "./utils.ts"
 
 server.listen(process.env.PORT, () =>
   console.log(`Listening on ${process.env.PORT}`),

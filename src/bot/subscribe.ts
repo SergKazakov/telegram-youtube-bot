@@ -1,12 +1,12 @@
 import { type youtube_v3 as youtubeV3 } from "@googleapis/youtube"
 import { type Context, Markup, type Middleware } from "telegraf"
 
-import { chatCollection, subscriptionCollection } from "../mongodb.mts"
+import { chatCollection, subscriptionCollection } from "../mongodb.ts"
 import {
   getOAuth2Client,
   getYoutubeClient,
   subscribeToChannel,
-} from "../utils.mts"
+} from "../utils.ts"
 
 async function* getSubscriptions(refreshToken: string) {
   const youtubeClient = getYoutubeClient(refreshToken)

@@ -5,12 +5,12 @@ import { XMLParser } from "fast-xml-parser"
 import { TelegramError } from "telegraf"
 import * as yup from "yup"
 
-import { bot } from "../bot/index.mts"
+import { bot } from "../bot/index.ts"
 import {
   chatCollection,
   subscriptionCollection,
   videoCollection,
-} from "../mongodb.mts"
+} from "../mongodb.ts"
 
 const schema = yup.object({
   feed: yup

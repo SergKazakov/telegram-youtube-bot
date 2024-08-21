@@ -2,9 +2,9 @@ import { type ServerResponse } from "node:http"
 
 import * as yup from "yup"
 
-import { bot } from "../bot/index.mts"
-import { chatCollection } from "../mongodb.mts"
-import { getOAuth2Client, parseSearchParams } from "../utils.mts"
+import { bot } from "../bot/index.ts"
+import { chatCollection } from "../mongodb.ts"
+import { getOAuth2Client, parseSearchParams } from "../utils.ts"
 
 export const oAuth2Callback = async (res: ServerResponse) => {
   const { code, state } = await parseSearchParams(
