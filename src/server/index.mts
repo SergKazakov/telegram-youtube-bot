@@ -11,25 +11,16 @@ export const server = createServer(async (req, res) => {
   try {
     const { pathname } = new URL(req.url as string, process.env.PUBLIC_URL)
 
-    if (pathname === "/healthcheck") {
-      return await healthCheck(res)
-    }
+    const handler = {
+      "HEAD/healthcheck": healthCheck,
+      "GET/pubsubhubbub": confirmSubscription,
+      "POST/pubsubhubbub": onFeed,
+      "GET/oauth2callback": oAuth2Callback,
+    }[req.method + pathname]
 
-    if (req.method === "GET" && pathname === "/pubsubhubbub") {
-      return await confirmSubscription(res)
-    }
-
-    if (req.method === "POST" && pathname === "/pubsubhubbub") {
-      return await onFeed(res)
-    }
-
-    if (req.method === "GET" && pathname === "/oauth2callback") {
-      return await oAuth2Callback(res)
-    }
-
-    res.writeHead(404).end()
+    return handler ? await handler(res) : res.writeHead(404).end()
   } catch (error) {
-    console.error(error)
+    console.error(error instanceof Error ? error.message : error)
 
     res.writeHead(error instanceof ValidationError ? 400 : 500).end()
   }

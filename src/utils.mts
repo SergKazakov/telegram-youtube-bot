@@ -1,13 +1,13 @@
 import { type IncomingMessage } from "node:http"
 
 import { auth, youtube } from "@googleapis/youtube"
-import { type AnySchema } from "yup"
+import * as yup from "yup"
 
-export const parseSearchParams = <T extends AnySchema>(
-  schema: T,
+export const parseSearchParams = <T extends yup.AnySchema>(
+  schema: (y: typeof yup) => T,
   req: IncomingMessage,
 ) =>
-  schema.validate(
+  schema(yup).validate(
     Object.fromEntries(
       new URL(req.url as string, process.env.PUBLIC_URL).searchParams,
     ),
