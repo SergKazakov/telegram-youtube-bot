@@ -29,7 +29,7 @@ export const server = createServer(async (req, res) => {
 
     res.writeHead(404).end()
   } catch (error) {
-    console.error(error)
+    console.error(error instanceof Error ? error.message : error)
 
     res.writeHead(error instanceof ValidationError ? 400 : 500).end()
   }
