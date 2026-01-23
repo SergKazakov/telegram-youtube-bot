@@ -1,6 +1,8 @@
 import { MongoClient } from "mongodb"
 
-const mongoClient = await MongoClient.connect(process.env.MONGODB_URL as string)
+import { env } from "./env.mts"
+
+const mongoClient = await MongoClient.connect(env.MONGODB_URL)
 
 const db = mongoClient.db()
 
@@ -13,4 +15,7 @@ export const subscriptionCollection = db.collection<{
   _id: { channelId: string; chatId: string }
 }>("subscriptions")
 
-export const videoCollection = db.collection<{ _id: string }>("videos")
+export const videoCollection = db.collection<{
+  _id: string
+  publishedAt: Date
+}>("videos")

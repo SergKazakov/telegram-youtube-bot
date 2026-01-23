@@ -1,8 +1,10 @@
 import { Telegraf } from "telegraf"
 
+import { env } from "../env.mts"
+
 import { subscribe } from "./subscribe.mts"
 
-export const bot = new Telegraf(process.env.BOT_TOKEN as string)
+export const bot = new Telegraf(env.BOT_TOKEN)
   .use(async (ctx, next) => {
     try {
       await next()

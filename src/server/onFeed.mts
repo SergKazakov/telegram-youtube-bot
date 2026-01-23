@@ -11,6 +11,7 @@ import {
   subscriptionCollection,
   videoCollection,
 } from "../mongodb.mts"
+import { isShorts } from "../utils.mts"
 
 const schema = yup.object({
   feed: yup
@@ -47,22 +48,16 @@ export const onFeed = async (res: ServerResponse) => {
 
   res.statusCode = 204
 
-  if (Date.now() - published.getTime() > 24 * 60 * 60 * 1000) {
+  if (
+    Date.now() - published.getTime() > 24 * 60 * 60 * 1000
+    || (await isShorts(videoId))
+  ) {
     return res.end()
   }
 
   try {
-    await videoCollection.insertOne({ _id: videoId })
+    await videoCollection.insertOne({ _id: videoId, publishedAt: published })
   } catch {
-    return res.end()
-  }
-
-  const { status } = await fetch(`https://www.youtube.com/shorts/${videoId}`, {
-    method: "HEAD",
-    redirect: "manual",
-  })
-
-  if (status === 200) {
     return res.end()
   }
 
@@ -79,8 +74,8 @@ export const onFeed = async (res: ServerResponse) => {
       )
     } catch (error) {
       if (
-        error instanceof TelegramError &&
-        error.description === "Forbidden: bot was blocked by the user"
+        error instanceof TelegramError
+        && error.description === "Forbidden: bot was blocked by the user"
       ) {
         shouldDelete.push(x._id.chatId)
       }

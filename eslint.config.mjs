@@ -1,6 +1,5 @@
 import js from "@eslint/js"
 import { defineConfig } from "eslint/config"
-import eslintConfigXo from "eslint-config-xo"
 import eslintPluginImport from "eslint-plugin-import"
 import eslintPluginPrettier from "eslint-plugin-prettier/recommended"
 import eslintPluginUnicorn from "eslint-plugin-unicorn"
@@ -9,7 +8,6 @@ import typescriptEslint from "typescript-eslint"
 export default defineConfig([
   { ignores: ["dist/"] },
   js.configs.recommended,
-  { rules: eslintConfigXo.rules },
   eslintPluginUnicorn.configs.recommended,
   ...typescriptEslint.configs.recommended,
   eslintPluginPrettier,
@@ -27,6 +25,7 @@ export default defineConfig([
         { "newlines-between": "always", alphabetize: { order: "asc" } },
       ],
       "no-await-in-loop": "off",
+      "no-empty": ["error", { allowEmptyCatch: true }],
       "sort-imports": ["error", { ignoreDeclarationSort: true }],
       "unicorn/filename-case": "off",
       "unicorn/prevent-abbreviations": "off",
