@@ -2,9 +2,9 @@ import { MongoClient } from "mongodb"
 
 import { env } from "./env.mts"
 
-const mongoClient = await MongoClient.connect(env.MONGODB_URL)
+export const mongoClient = await MongoClient.connect(env.MONGODB_URL)
 
-const db = mongoClient.db()
+export const db = mongoClient.db()
 
 export const chatCollection = db.collection<{
   _id: string

@@ -13,6 +13,8 @@ import {
 } from "../mongodb.mts"
 import { isShorts } from "../utils.mts"
 
+export const dayMs = 24 * 60 * 60 * 1000
+
 const schema = yup.object({
   feed: yup
     .object({
@@ -48,10 +50,7 @@ export const onFeed = async (res: ServerResponse) => {
 
   res.statusCode = 204
 
-  if (
-    Date.now() - published.getTime() > 24 * 60 * 60 * 1000
-    || (await isShorts(videoId))
-  ) {
+  if (Date.now() - published.getTime() > dayMs || (await isShorts(videoId))) {
     return res.end()
   }
 

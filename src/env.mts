@@ -8,6 +8,6 @@ export const env = cleanEnv(process.env, {
     default: "mongodb://localhost:27017/telegram-youtube-bot",
   }),
   PORT: port({ default: 4444 }),
-  PUBLIC_URL: url({ default: "" }),
+  PUBLIC_URL: url({ default: "http://localhost:4444" }),
   YOUTUBE_API_TOKEN: str({ default: "" }),
 })
