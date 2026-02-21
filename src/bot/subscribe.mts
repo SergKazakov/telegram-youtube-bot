@@ -1,5 +1,5 @@
 import { type youtube_v3 as youtubeV3 } from "@googleapis/youtube"
-import { type Context, Markup, type Middleware } from "telegraf"
+import { type Context, Markup, type MiddlewareFn } from "telegraf"
 
 import { chatCollection, subscriptionCollection } from "../mongodb.mts"
 import {
@@ -29,7 +29,7 @@ async function* getSubscriptions(refreshToken: string) {
   } while (pageToken)
 }
 
-export const subscribe: Middleware<Context> = async ctx => {
+export const subscribe: MiddlewareFn<Context> = async ctx => {
   const chatId = String(ctx.chat?.id)
 
   const chat = await chatCollection.findOne({ _id: chatId })
@@ -67,12 +67,10 @@ export const subscribe: Middleware<Context> = async ctx => {
     }
   }
 
-  if (channels.length > 0) {
-    await subscriptionCollection.deleteMany({
-      "_id.channelId": { $nin: channels },
-      "_id.chatId": chatId,
-    })
-  }
+  await subscriptionCollection.deleteMany({
+    ...(channels.length > 0 && { "_id.channelId": { $nin: channels } }),
+    "_id.chatId": chatId,
+  })
 
   return ctx.reply(`You were subscribed to ${channels.length} channels`)
 }
