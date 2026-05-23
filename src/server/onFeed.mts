@@ -72,6 +72,8 @@ export const onFeed = async (res: ServerResponse) => {
         { parse_mode: "HTML" },
       )
     } catch (error) {
+      console.error(error)
+
       if (
         error instanceof TelegramError
         && error.description === "Forbidden: bot was blocked by the user"

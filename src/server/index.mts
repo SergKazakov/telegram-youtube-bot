@@ -2,6 +2,7 @@ import { createServer } from "node:http"
 
 import { ValidationError } from "yup"
 
+import { webhook } from "../bot/index.mts"
 import { env } from "../env.mts"
 
 import { confirmSubscription } from "./confirmSubscription.mts"
@@ -20,7 +21,13 @@ export const server = createServer(async (req, res) => {
       "GET/oauth2callback": oAuth2Callback,
     }[req.method + pathname]
 
-    return handler ? await handler(res) : res.writeHead(404).end()
+    if (handler) {
+      await handler(res)
+
+      return
+    }
+
+    return webhook ? webhook(req, res) : res.writeHead(404).end()
   } catch (error) {
     console.error(error instanceof Error ? error.message : error)
 

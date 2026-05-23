@@ -1,6 +1,6 @@
 import js from "@eslint/js"
 import { defineConfig } from "eslint/config"
-import eslintPluginImport from "eslint-plugin-import"
+import { importX } from "eslint-plugin-import-x"
 import eslintPluginPrettier from "eslint-plugin-prettier/recommended"
 import eslintPluginUnicorn from "eslint-plugin-unicorn"
 import typescriptEslint from "typescript-eslint"
@@ -11,7 +11,7 @@ export default defineConfig([
   ...typescriptEslint.configs.recommended,
   eslintPluginPrettier,
   {
-    plugins: { import: eslintPluginImport },
+    plugins: { "import-x": importX },
     rules: {
       "@typescript-eslint/consistent-type-imports": [
         "error",
@@ -19,7 +19,7 @@ export default defineConfig([
       ],
       camelcase: ["error", { properties: "never" }],
       "capitalized-comments": "off",
-      "import/order": [
+      "import-x/order": [
         "error",
         { "newlines-between": "always", alphabetize: { order: "asc" } },
       ],

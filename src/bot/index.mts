@@ -15,3 +15,8 @@ export const bot = new Telegraf(env.BOT_TOKEN)
     }
   })
   .command("subscribe", subscribe)
+
+export const webhook =
+  new URL(env.PUBLIC_URL).protocol === "https:"
+    ? await bot.createWebhook({ domain: env.PUBLIC_URL, allowed_updates: [] })
+    : null

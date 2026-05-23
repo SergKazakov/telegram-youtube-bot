@@ -1,6 +1,6 @@
 import { Cron } from "croner"
 
-import { bot } from "./bot/index.mts"
+import { bot, webhook } from "./bot/index.mts"
 import { env } from "./env.mts"
 import { subscriptionCollection } from "./mongodb.mts"
 import { server } from "./server/index.mts"
@@ -16,4 +16,6 @@ new Cron("0 0 0 * * *", { catch: error => console.error(error) }, async () => {
   }
 })
 
-await bot.launch({ allowedUpdates: [] })
+if (!webhook) {
+  await bot.launch({ allowedUpdates: [] })
+}
