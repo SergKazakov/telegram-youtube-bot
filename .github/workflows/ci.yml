@@ -24,4 +24,6 @@ jobs:
         with:
           path: node_modules
           key: ${{ hashFiles('package-lock.json') }}
+      - run: npx eslint
+      - run: npx tsc
       - run: npm t

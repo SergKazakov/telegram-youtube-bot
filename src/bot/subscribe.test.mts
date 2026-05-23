@@ -1,3 +1,8 @@
+import {
+  GaxiosError,
+  type GaxiosOptionsPrepared,
+  type GaxiosResponse,
+} from "gaxios"
 import { Context, Telegram } from "telegraf"
 import { expect, it, vi } from "vitest"
 
@@ -49,7 +54,43 @@ it("should ask to sign in when there is no refresh token", async () => {
 
   await subscribe(ctx, vi.fn())
 
-  expect(ctx.reply).toHaveBeenCalledWith("Sign up", expect.any(Object))
+  expect(ctx.reply).toHaveBeenCalledWith("Sign up", expect.anything())
+})
+
+it("should reset refresh token when google returns invalid_grant", async () => {
+  getOAuth2Client.mockReturnValue({
+    generateAuthUrl: vi.fn().mockReturnValue(""),
+  })
+
+  await chatCollection.insertOne({ _id: "0", refreshToken: "refreshToken" })
+
+  getYoutubeClient.mockReturnValue({
+    subscriptions: {
+      list: vi
+        .fn()
+        .mockRejectedValue(
+          new GaxiosError(
+            "invalid_grant",
+            { responseType: "json" } as GaxiosOptionsPrepared,
+            {
+              bodyUsed: true,
+              config: { responseType: "json" } as GaxiosOptionsPrepared,
+              data: { error: "invalid_grant" },
+            } as GaxiosResponse,
+          ),
+        ),
+    },
+  })
+
+  const ctx = createContext()
+
+  await subscribe(ctx, vi.fn())
+
+  expect(ctx.reply).toHaveBeenCalledWith("Sign up", expect.anything())
+
+  await expect(
+    chatCollection.findOne({ _id: "0", refreshToken: null }),
+  ).resolves.not.toBeNull()
 })
 
 it("should delete stale subscriptions when youtube subscriptions are empty", async () => {

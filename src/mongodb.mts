@@ -8,7 +8,7 @@ export const db = mongoClient.db()
 
 export const chatCollection = db.collection<{
   _id: string
-  refreshToken: string
+  refreshToken: string | null
 }>("chats")
 
 export const subscriptionCollection = db.collection<{

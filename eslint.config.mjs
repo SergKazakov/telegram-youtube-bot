@@ -6,7 +6,6 @@ import eslintPluginUnicorn from "eslint-plugin-unicorn"
 import typescriptEslint from "typescript-eslint"
 
 export default defineConfig([
-  { ignores: ["dist/"] },
   js.configs.recommended,
   eslintPluginUnicorn.configs.recommended,
   ...typescriptEslint.configs.recommended,
@@ -28,6 +27,7 @@ export default defineConfig([
       "no-empty": ["error", { allowEmptyCatch: true }],
       "sort-imports": ["error", { ignoreDeclarationSort: true }],
       "unicorn/filename-case": "off",
+      "unicorn/no-null": "off",
       "unicorn/prevent-abbreviations": "off",
     },
   },
