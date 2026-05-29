@@ -6,16 +6,34 @@ export const mongoClient = await MongoClient.connect(env.MONGODB_URL)
 
 export const db = mongoClient.db()
 
-export const chatCollection = db.collection<{
-  _id: string
-  refreshToken: string | null
-}>("chats")
+export type ChatSchema = { _id: string; refreshToken: string | null }
 
-export const subscriptionCollection = db.collection<{
-  _id: { channelId: string; chatId: string }
-}>("subscriptions")
+export const chatCollection = db.collection<ChatSchema>("chats")
 
-export const videoCollection = db.collection<{
+export type SubscriptionSchema = { _id: { channelId: string; chatId: string } }
+
+export const subscriptionCollection =
+  db.collection<SubscriptionSchema>("subscriptions")
+
+export type VideoSchema = {
   _id: string
   publishedAt: Date
-}>("videos")
+  authorName: string
+  title: string
+}
+
+export const videoCollection = db.collection<VideoSchema>("videos")
+
+export type DeliverySchema = {
+  _id: { chatId: string; videoId: string }
+  createdAt: Date
+  nextAttemptAt: Date
+  status: "pending" | "delivered" | "failed"
+  authorName: string
+  title: string
+  attempts: number
+}
+
+export const deliveryCollection = db.collection<DeliverySchema>("deliveries")
+
+await deliveryCollection.createIndex({ status: 1, nextAttemptAt: 1 })

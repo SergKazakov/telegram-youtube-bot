@@ -1,4 +1,4 @@
-import { cleanEnv, port, str, url } from "envalid"
+import { cleanEnv, num, port, str, url } from "envalid"
 
 export const env = cleanEnv(process.env, {
   BOT_TOKEN: str({ devDefault: "" }),
@@ -10,4 +10,5 @@ export const env = cleanEnv(process.env, {
   PORT: port({ default: 4444 }),
   PUBLIC_URL: url({ default: "http://localhost:4444" }),
   YOUTUBE_API_TOKEN: str({ devDefault: "" }),
+  MAX_ATTEMPTS_TO_DELIVER: num({ default: 5 }),
 })

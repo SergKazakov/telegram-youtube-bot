@@ -12,6 +12,11 @@ import {
   subscribeToChannel,
 } from "../__mocks__/utils.mts"
 import { chatCollection, subscriptionCollection } from "../mongodb.mts"
+import {
+  createChat,
+  createChatSubscription,
+  createSubscriptions,
+} from "../testUtils/index.mts"
 
 import { subscribe } from "./subscribe.mts"
 
@@ -62,7 +67,7 @@ it("should reset refresh token when google returns invalid_grant", async () => {
     generateAuthUrl: vi.fn().mockReturnValue(""),
   })
 
-  await chatCollection.insertOne({ _id: "0", refreshToken: "refreshToken" })
+  await createChat({ _id: "0" })
 
   getYoutubeClient.mockReturnValue({
     subscriptions: {
@@ -94,11 +99,7 @@ it("should reset refresh token when google returns invalid_grant", async () => {
 })
 
 it("should delete stale subscriptions when youtube subscriptions are empty", async () => {
-  await chatCollection.insertOne({ _id: "0", refreshToken: "refreshToken" })
-
-  await subscriptionCollection.insertMany([
-    { _id: { channelId: "0", chatId: "0" } },
-  ])
+  await createChatSubscription({ _id: "0" }, { channelId: "0", chatId: "0" })
 
   getYoutubeClient.mockReturnValue({
     subscriptions: {
@@ -114,16 +115,16 @@ it("should delete stale subscriptions when youtube subscriptions are empty", asy
 
   expect(ctx.reply).toHaveBeenCalledWith("You were subscribed to 0 channels")
 
-  await expect(subscriptionCollection.countDocuments()).resolves.toBe(0)
+  await expect(subscriptionCollection.findOne()).resolves.toBeNull()
 })
 
 it("should subscribe to channels and delete stale subscriptions", async () => {
-  await chatCollection.insertOne({ _id: "0", refreshToken: "refreshToken" })
+  await createChat({ _id: "0" })
 
-  await subscriptionCollection.insertMany([
-    { _id: { channelId: "0", chatId: "0" } },
-    { _id: { channelId: "1", chatId: "0" } },
-    { _id: { channelId: "0", chatId: "1" } },
+  await createSubscriptions([
+    { channelId: "0", chatId: "0" },
+    { channelId: "1", chatId: "0" },
+    { channelId: "0", chatId: "1" },
   ])
 
   getYoutubeClient.mockReturnValue({
