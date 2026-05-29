@@ -1,26 +1,9 @@
+import dayjs from "dayjs"
 import { expect, it } from "vitest"
 
 import { isShorts } from "../__mocks__/utils.mts"
-import { bot } from "../bot/index.mts"
-import {
-  chatCollection,
-  subscriptionCollection,
-  videoCollection,
-} from "../mongodb.mts"
-import { client } from "../testUtils/index.mts"
-
-import { dayMs } from "./onFeed.mts"
-
-const createSubscriber = async () => {
-  await chatCollection.insertOne({
-    _id: "chatId",
-    refreshToken: "refreshToken",
-  })
-
-  await subscriptionCollection.insertOne({
-    _id: { channelId: "channelId", chatId: "chatId" },
-  })
-}
+import { deliveryCollection, videoCollection } from "../mongodb.mts"
+import { client, createChatSubscription } from "../testUtils/index.mts"
 
 const createFeed = (published = new Date()) => {
   return /* HTML */ `
@@ -66,12 +49,14 @@ it("should return 400", async () => {
 
 it("should not process videos older than 24 hours", async () => {
   const { status } = await postPubSubHubBub(
-    createFeed(new Date(Date.now() - dayMs - 1)),
+    createFeed(dayjs().subtract(1, "d").subtract(1, "millisecond").toDate()),
   )
 
   expect(status).toBe(204)
 
-  expect(bot.telegram.sendMessage).not.toHaveBeenCalled()
+  await expect(videoCollection.findOne()).resolves.toBeNull()
+
+  await expect(deliveryCollection.findOne()).resolves.toBeNull()
 })
 
 it("should filter Shorts", async () => {
@@ -81,26 +66,39 @@ it("should filter Shorts", async () => {
 
   expect(status).toBe(204)
 
-  expect(bot.telegram.sendMessage).not.toHaveBeenCalled()
+  await expect(videoCollection.findOne()).resolves.toBeNull()
+
+  await expect(deliveryCollection.findOne()).resolves.toBeNull()
 })
 
-it("should send a message to subscribed chats", async () => {
-  await createSubscriber()
+it("should create deliveries for subscribed chats", async () => {
+  await createChatSubscription()
 
   {
     const { status } = await postPubSubHubBub(createFeed())
 
     expect(status).toBe(204)
 
-    expect(bot.telegram.sendMessage).toHaveBeenCalledWith(
-      "chatId",
-      `<a href="https://www.youtube.com/watch?v=videoId">name – title</a>`,
-      { parse_mode: "HTML" },
-    )
-
     await expect(
       videoCollection.findOne({ _id: "videoId" }),
-    ).resolves.toMatchObject({ publishedAt: expect.any(Date) })
+    ).resolves.toMatchObject({
+      publishedAt: expect.any(Date),
+      authorName: "name",
+      title: "title",
+    })
+
+    await expect(
+      deliveryCollection.findOne({
+        _id: { chatId: "chatId", videoId: "videoId" },
+      }),
+    ).resolves.toMatchObject({
+      createdAt: expect.any(Date),
+      nextAttemptAt: expect.any(Date),
+      status: "pending",
+      authorName: "name",
+      title: "title",
+      attempts: 0,
+    })
   }
 
   {
@@ -108,6 +106,8 @@ it("should send a message to subscribed chats", async () => {
 
     expect(status).toBe(204)
 
-    expect(bot.telegram.sendMessage).toBeCalledTimes(1)
+    await expect(videoCollection.countDocuments()).resolves.toBe(1)
+
+    await expect(deliveryCollection.countDocuments()).resolves.toBe(1)
   }
 })

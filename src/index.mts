@@ -1,20 +1,24 @@
 import { Cron } from "croner"
 
 import { bot, webhook } from "./bot/index.mts"
+import { deliver } from "./cron/deliver.mts"
+import { resubscribeToChannels } from "./cron/resubscribeToChannels.mts"
 import { env } from "./env.mts"
-import { subscriptionCollection } from "./mongodb.mts"
 import { server } from "./server/index.mts"
-import { subscribeToChannel } from "./utils.mts"
 
 server.listen(env.PORT, () => console.log(`Listening on ${env.PORT}`))
 
-new Cron("0 0 0 * * *", { catch: error => console.error(error) }, async () => {
-  for await (const x of subscriptionCollection.aggregate<{ _id: string }>([
-    { $group: { _id: "$_id.channelId" } },
-  ])) {
-    await subscribeToChannel(x._id)
-  }
-})
+new Cron(
+  "0 0 0 * * *",
+  { catch: error => console.error(error) },
+  resubscribeToChannels,
+)
+
+new Cron(
+  "0 * * * * *",
+  { catch: error => console.error(error), protect: true },
+  deliver,
+)
 
 if (!webhook) {
   await bot.launch({ allowedUpdates: [] })

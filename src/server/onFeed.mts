@@ -1,19 +1,17 @@
 import { type ServerResponse } from "node:http"
 import { text } from "node:stream/consumers"
 
+import dayjs from "dayjs"
 import { XMLParser } from "fast-xml-parser"
-import { TelegramError } from "telegraf"
 import * as yup from "yup"
 
-import { bot } from "../bot/index.mts"
 import {
-  chatCollection,
+  type DeliverySchema,
+  deliveryCollection,
   subscriptionCollection,
   videoCollection,
 } from "../mongodb.mts"
 import { isShorts } from "../utils.mts"
-
-export const dayMs = 24 * 60 * 60 * 1000
 
 const schema = yup.object({
   feed: yup
@@ -50,46 +48,41 @@ export const onFeed = async (res: ServerResponse) => {
 
   res.statusCode = 204
 
-  if (Date.now() - published.getTime() > dayMs || (await isShorts(videoId))) {
+  if (dayjs().diff(published, "d", true) > 1 || (await isShorts(videoId))) {
     return res.end()
   }
 
   try {
-    await videoCollection.insertOne({ _id: videoId, publishedAt: published })
+    await videoCollection.insertOne({
+      _id: videoId,
+      publishedAt: published,
+      authorName: name,
+      title,
+    })
   } catch {
     return res.end()
   }
 
   const cursor = subscriptionCollection.find({ "_id.channelId": channelId })
 
-  const shouldDelete: string[] = []
+  const rows: DeliverySchema[] = []
 
-  for await (const x of cursor) {
-    try {
-      await bot.telegram.sendMessage(
-        x._id.chatId,
-        `<a href="https://www.youtube.com/watch?v=${videoId}">${name} – ${title}</a>`,
-        { parse_mode: "HTML" },
-      )
-    } catch (error) {
-      console.error(error)
+  const createdAt = new Date()
 
-      if (
-        error instanceof TelegramError
-        && error.description === "Forbidden: bot was blocked by the user"
-      ) {
-        shouldDelete.push(x._id.chatId)
-      }
-    }
+  for await (const it of cursor) {
+    rows.push({
+      _id: { chatId: it._id.chatId, videoId },
+      createdAt,
+      nextAttemptAt: createdAt,
+      status: "pending",
+      authorName: name,
+      title,
+      attempts: 0,
+    })
   }
 
-  if (shouldDelete.length > 0) {
-    await Promise.all([
-      chatCollection.deleteMany({ _id: { $in: shouldDelete } }),
-      subscriptionCollection.deleteMany({
-        "_id.chatId": { $in: shouldDelete },
-      }),
-    ])
+  if (rows.length > 0) {
+    await deliveryCollection.insertMany(rows)
   }
 
   return res.end()

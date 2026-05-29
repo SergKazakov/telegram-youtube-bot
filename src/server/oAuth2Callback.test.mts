@@ -1,7 +1,7 @@
 import { expect, it, vi } from "vitest"
 
 import { getOAuth2Client } from "../__mocks__/utils.mts"
-import { bot } from "../bot/index.mts"
+import { bot } from "../bot/__mocks__/index.mts"
 import { chatCollection } from "../mongodb.mts"
 import { client } from "../testUtils/index.mts"
 

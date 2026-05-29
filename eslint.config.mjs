@@ -1,4 +1,5 @@
 import js from "@eslint/js"
+import stylistic from "@stylistic/eslint-plugin"
 import { defineConfig } from "eslint/config"
 import { importX } from "eslint-plugin-import-x"
 import eslintPluginPrettier from "eslint-plugin-prettier/recommended"
@@ -11,8 +12,13 @@ export default defineConfig([
   ...typescriptEslint.configs.recommended,
   eslintPluginPrettier,
   {
-    plugins: { "import-x": importX },
+    plugins: { "@stylistic": stylistic, "import-x": importX },
     rules: {
+      "@stylistic/padding-line-between-statements": [
+        "error",
+        { blankLine: "always", prev: "*", next: "*" },
+        { blankLine: "any", prev: "import", next: "import" },
+      ],
       "@typescript-eslint/consistent-type-imports": [
         "error",
         { fixStyle: "inline-type-imports" },
