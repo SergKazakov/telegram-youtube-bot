@@ -1,17 +1,8 @@
-import {
-  GaxiosError,
-  type GaxiosOptionsPrepared,
-  type GaxiosResponse,
-} from "gaxios"
 import { Context, Telegram } from "telegraf"
 import { expect, it, vi } from "vitest"
 
-import {
-  getOAuth2Client,
-  getYoutubeClient,
-  subscribeToChannel,
-} from "../__mocks__/utils.mts"
-import { chatCollection, subscriptionCollection } from "../mongodb.mts"
+import { getSubscriptions, subscribeToChannel } from "../__mocks__/utils.mts"
+import { subscriptionCollection } from "../mongodb.mts"
 import {
   createChat,
   createChatSubscription,
@@ -47,67 +38,15 @@ const createContext = () => {
 
   ctx.reply = vi.fn()
 
+  ctx.state.chat = { _id: "0", refreshToken: "refreshToken" }
+
   return ctx
 }
-
-it("should ask to sign in when there is no refresh token", async () => {
-  getOAuth2Client.mockReturnValue({
-    generateAuthUrl: vi.fn().mockReturnValue(""),
-  })
-
-  const ctx = createContext()
-
-  await subscribe(ctx, vi.fn())
-
-  expect(ctx.reply).toHaveBeenCalledWith("Sign up", expect.anything())
-})
-
-it("should reset refresh token when google returns invalid_grant", async () => {
-  getOAuth2Client.mockReturnValue({
-    generateAuthUrl: vi.fn().mockReturnValue(""),
-  })
-
-  await createChat({ _id: "0" })
-
-  getYoutubeClient.mockReturnValue({
-    subscriptions: {
-      list: vi
-        .fn()
-        .mockRejectedValue(
-          new GaxiosError(
-            "invalid_grant",
-            { responseType: "json" } as GaxiosOptionsPrepared,
-            {
-              bodyUsed: true,
-              config: { responseType: "json" } as GaxiosOptionsPrepared,
-              data: { error: "invalid_grant" },
-            } as GaxiosResponse,
-          ),
-        ),
-    },
-  })
-
-  const ctx = createContext()
-
-  await subscribe(ctx, vi.fn())
-
-  expect(ctx.reply).toHaveBeenCalledWith("Sign up", expect.anything())
-
-  await expect(
-    chatCollection.findOne({ _id: "0", refreshToken: null }),
-  ).resolves.not.toBeNull()
-})
 
 it("should delete stale subscriptions when youtube subscriptions are empty", async () => {
   await createChatSubscription({ _id: "0" }, { channelId: "0", chatId: "0" })
 
-  getYoutubeClient.mockReturnValue({
-    subscriptions: {
-      list: vi
-        .fn()
-        .mockResolvedValue({ data: { items: [], nextPageToken: undefined } }),
-    },
-  })
+  getSubscriptions.mockResolvedValue({ items: [], nextPageToken: null })
 
   const ctx = createContext()
 
@@ -127,20 +66,12 @@ it("should subscribe to channels and delete stale subscriptions", async () => {
     { channelId: "0", chatId: "1" },
   ])
 
-  getYoutubeClient.mockReturnValue({
-    subscriptions: {
-      list: vi
-        .fn()
-        .mockResolvedValue({
-          data: {
-            items: [
-              { snippet: { resourceId: { channelId: "1" } } },
-              { snippet: { resourceId: { channelId: "2" } } },
-            ],
-            nextPageToken: undefined,
-          },
-        }),
-    },
+  getSubscriptions.mockResolvedValue({
+    items: [
+      { channelId: "1", title: "foo" },
+      { channelId: "2", title: "foo" },
+    ],
+    nextPageToken: null,
   })
 
   const ctx = createContext()

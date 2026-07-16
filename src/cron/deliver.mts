@@ -9,22 +9,79 @@ import {
   chatCollection,
   deliveryCollection,
   subscriptionCollection,
+  videoCollection,
 } from "../mongodb.mts"
+import { buildVideoUrl } from "../utils.mts"
+
+const BATCH_SIZE = 100
+
+async function* getDeliveries() {
+  const now = new Date()
+
+  let count = 0
+
+  for (;;) {
+    const doc = await deliveryCollection.findOneAndUpdate(
+      { nextAttemptAt: { $lte: now }, status: "pending" },
+      { $set: { status: "processing" } },
+      {
+        projection: { attempts: 1 },
+        sort: { nextAttemptAt: 1 },
+        returnDocument: "after",
+      },
+    )
+
+    if (!doc || ++count >= BATCH_SIZE) {
+      break
+    }
+
+    yield doc
+  }
+}
 
 export const deliver = async () => {
-  const cursor = deliveryCollection
-    .find({ nextAttemptAt: { $lte: new Date() }, status: "pending" })
-    .sort({ nextAttemptAt: 1 })
+  const deliveries: DeliverySchema[] = []
+
+  const videoIds: DeliverySchema["_id"]["videoId"][] = []
+
+  for await (const it of getDeliveries()) {
+    deliveries.push(it)
+
+    videoIds.push(it._id.videoId)
+  }
+
+  if (deliveries.length === 0) {
+    return
+  }
+
+  const videos = await videoCollection
+    .find({ _id: { $in: videoIds } })
+    .toArray()
+
+  const videoMap = new Map(videos.map(it => [it._id, it]))
 
   const operations: AnyBulkWriteOperation<DeliverySchema>[] = []
 
   const blockedChatIds = new Set<string>()
 
-  for await (const it of cursor) {
+  for (const it of deliveries) {
+    const video = videoMap.get(it._id.videoId)
+
+    if (!video) {
+      operations.push({
+        updateOne: {
+          filter: { _id: it._id },
+          update: { $set: { status: "failed" } },
+        },
+      })
+
+      continue
+    }
+
     try {
       await bot.telegram.sendMessage(
         it._id.chatId,
-        `<a href="https://www.youtube.com/watch?v=${it._id.videoId}">${it.authorName} – ${it.title}</a>`,
+        `<a href="${buildVideoUrl(it._id.videoId)}">${video.authorName} – ${video.title}</a>`,
         { parse_mode: "HTML" },
       )
 
@@ -62,7 +119,7 @@ export const deliver = async () => {
             $set: {
               ...(attempts < env.MAX_ATTEMPTS_TO_DELIVER && {
                 nextAttemptAt: dayjs()
-                  .add(2 ** (attempts - 1), "minute")
+                  .add(2 ** (attempts - 1), "m")
                   .toDate(),
               }),
               status:

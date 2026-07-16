@@ -29,41 +29,40 @@ const schema = yup.object({
     .required(),
 })
 
+const xmlParser = new XMLParser()
+
 export const onFeed = async (res: ServerResponse) => {
   const rawBody = await text(res.req)
 
   console.log(rawBody)
 
   const {
-    feed: {
-      entry: {
-        "yt:videoId": videoId,
-        "yt:channelId": channelId,
-        title,
-        author: { name },
-        published,
-      },
-    },
-  } = await schema.validate(new XMLParser().parse(rawBody))
+    feed: { entry },
+  } = await schema.validate(xmlParser.parse(rawBody))
 
   res.statusCode = 204
 
-  if (dayjs().diff(published, "d", true) > 1 || (await isShorts(videoId))) {
+  if (
+    dayjs().diff(entry.published, "d", true) > 1
+    || (await isShorts(entry["yt:videoId"]))
+  ) {
     return res.end()
   }
 
   try {
     await videoCollection.insertOne({
-      _id: videoId,
-      publishedAt: published,
-      authorName: name,
-      title,
+      _id: entry["yt:videoId"],
+      publishedAt: entry.published,
+      authorName: entry.author.name,
+      title: entry.title,
     })
   } catch {
     return res.end()
   }
 
-  const cursor = subscriptionCollection.find({ "_id.channelId": channelId })
+  const cursor = subscriptionCollection.find({
+    "_id.channelId": entry["yt:channelId"],
+  })
 
   const rows: DeliverySchema[] = []
 
@@ -71,12 +70,10 @@ export const onFeed = async (res: ServerResponse) => {
 
   for await (const it of cursor) {
     rows.push({
-      _id: { chatId: it._id.chatId, videoId },
+      _id: { chatId: it._id.chatId, videoId: entry["yt:videoId"] },
       createdAt,
       nextAttemptAt: createdAt,
       status: "pending",
-      authorName: name,
-      title,
       attempts: 0,
     })
   }

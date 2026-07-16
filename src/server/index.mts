@@ -1,4 +1,4 @@
-import { createServer } from "node:http"
+import { createServer as createHttpServer } from "node:http"
 
 import { ValidationError } from "yup"
 
@@ -10,27 +10,52 @@ import { healthCheck } from "./healthCheck.mts"
 import { oAuth2Callback } from "./oAuth2Callback.mts"
 import { onFeed } from "./onFeed.mts"
 
-export const server = createServer(async (req, res) => {
-  try {
-    const { pathname } = new URL(req.url as string, env.PUBLIC_URL)
+export const createServer = (port = env.PORT) => {
+  const server = createHttpServer(async (req, res) => {
+    try {
+      const { pathname } = new URL(req.url as string, env.PUBLIC_URL)
 
-    const handler = {
-      "HEAD/healthcheck": healthCheck,
-      "GET/pubsubhubbub": confirmSubscription,
-      "POST/pubsubhubbub": onFeed,
-      "GET/oauth2callback": oAuth2Callback,
-    }[req.method + pathname]
+      const handler = {
+        "HEAD/healthcheck": healthCheck,
+        "GET/pubsubhubbub": confirmSubscription,
+        "POST/pubsubhubbub": onFeed,
+        "GET/oauth2callback": oAuth2Callback,
+      }[req.method + pathname]
 
-    if (handler) {
-      await handler(res)
+      if (handler) {
+        await handler(res)
 
-      return
+        return
+      }
+
+      return webhook ? webhook(req, res) : res.writeHead(404).end()
+    } catch (error) {
+      console.error(error instanceof Error ? error.message : error)
+
+      res.writeHead(error instanceof ValidationError ? 400 : 500).end()
     }
+  })
 
-    return webhook ? webhook(req, res) : res.writeHead(404).end()
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : error)
+  const close = () => {
+    const { promise, resolve, reject } = Promise.withResolvers<void>()
 
-    res.writeHead(error instanceof ValidationError ? 400 : 500).end()
+    server.close(error => (error ? reject(error) : resolve()))
+
+    return promise
   }
-})
+
+  return {
+    server,
+    listen: () => {
+      const { promise, resolve } = Promise.withResolvers<typeof close>()
+
+      server.listen(port, () => {
+        console.log(`Listening on ${port}`)
+
+        resolve(close)
+      })
+
+      return promise
+    },
+  }
+}

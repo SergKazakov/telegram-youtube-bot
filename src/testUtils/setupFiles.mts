@@ -9,16 +9,18 @@ vi.mock("../bot/index.mts")
 vi.mock("../utils.mts")
 
 beforeAll(async () => {
-  const { server } = await import("../server/index.mts")
+  const { createServer } = await import("../server/index.mts")
 
-  await new Promise<void>(resolve => server.listen(0, resolve))
+  const { server, listen } = createServer(0)
+
+  const close = await listen()
 
   const { setupClient } = await import("./index.mts")
 
   setupClient((server.address() as AddressInfo).port)
 
   return async () => {
-    await new Promise<void>(resolve => server.close(() => resolve()))
+    await close()
 
     const { mongoClient } = await import("../mongodb.mts")
 

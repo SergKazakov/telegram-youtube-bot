@@ -8,6 +8,8 @@ export const db = mongoClient.db()
 
 export type ChatSchema = { _id: string; refreshToken: string | null }
 
+export type AuthenticatedChatSchema = ChatSchema & { refreshToken: string }
+
 export const chatCollection = db.collection<ChatSchema>("chats")
 
 export type SubscriptionSchema = { _id: { channelId: string; chatId: string } }
@@ -28,12 +30,12 @@ export type DeliverySchema = {
   _id: { chatId: string; videoId: string }
   createdAt: Date
   nextAttemptAt: Date
-  status: "pending" | "delivered" | "failed"
-  authorName: string
-  title: string
+  status: "pending" | "processing" | "delivered" | "failed"
   attempts: number
 }
 
 export const deliveryCollection = db.collection<DeliverySchema>("deliveries")
 
-await deliveryCollection.createIndex({ status: 1, nextAttemptAt: 1 })
+export const setupDatabase = async () => {
+  await deliveryCollection.createIndex({ status: 1, nextAttemptAt: 1 })
+}
