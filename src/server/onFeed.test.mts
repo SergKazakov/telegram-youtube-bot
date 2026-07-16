@@ -1,22 +1,25 @@
 import dayjs from "dayjs"
 import { expect, it } from "vitest"
 
-import { isShorts } from "../__mocks__/utils.mts"
+import {
+  buildChannelUrl,
+  buildFeedUrl,
+  buildVideoUrl,
+  isShorts,
+} from "../__mocks__/utils.mts"
 import { deliveryCollection, videoCollection } from "../mongodb.mts"
 import { client, createChatSubscription } from "../testUtils/index.mts"
 
-const createFeed = (published = new Date()) => {
-  return /* HTML */ `
+const createFeed = (published = new Date()) =>
+  /* HTML */
+  `
     <?xml version='1.0' encoding='UTF-8'?>
     <feed
       xmlns:yt="http://www.youtube.com/xml/schemas/2015"
       xmlns="http://www.w3.org/2005/Atom"
     >
       <link rel="hub" href="https://pubsubhubbub.appspot.com" />
-      <link
-        rel="self"
-        href="https://www.youtube.com/xml/feeds/videos.xml?channel_id=channelId"
-      />
+      <link rel="self" href="${buildFeedUrl("channelId")}" />
       <title>YouTube video feed</title>
       <updated>${published.toISOString()}</updated>
       <entry>
@@ -24,17 +27,16 @@ const createFeed = (published = new Date()) => {
         <yt:videoId>videoId</yt:videoId>
         <yt:channelId>channelId</yt:channelId>
         <title>title</title>
-        <link rel="alternate" href="https://www.youtube.com/watch?v=videoId" />
+        <link rel="alternate" href="${buildVideoUrl("videoId")}" />
         <author>
           <name>name</name>
-          <uri>https://www.youtube.com/channel/channelId</uri>
+          <uri>${buildChannelUrl("channelId")}</uri>
         </author>
         <published>${published.toISOString()}</published>
         <updated>${published.toISOString()}</updated>
       </entry>
     </feed>
   `
-}
 
 const postPubSubHubBub = (xml: string) =>
   client.post("/pubsubhubbub", xml, {
@@ -95,8 +97,6 @@ it("should create deliveries for subscribed chats", async () => {
       createdAt: expect.any(Date),
       nextAttemptAt: expect.any(Date),
       status: "pending",
-      authorName: "name",
-      title: "title",
       attempts: 0,
     })
   }

@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
   ci:
@@ -27,3 +28,22 @@ jobs:
       - run: npx eslint
       - run: npx tsc
       - run: npm t
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.APP_DIR }}
+            git fetch origin master
+            git reset --hard origin/master
+            . ~/.nvm/nvm.sh && npm ci --omit=dev
+            oxmgr validate ./oxfile.toml
+            oxmgr apply ./oxfile.toml
+            oxmgr restart telegram-youtube-bot

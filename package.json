@@ -17,30 +17,39 @@
   },
   "dependencies": {
     "@googleapis/youtube": "^33.0.0",
-    "axios": "^1.16.1",
+    "axios": "^1.18.1",
     "croner": "^10.0.1",
     "dayjs": "^1.11.21",
-    "envalid": "^8.1.1",
-    "fast-xml-parser": "^5.8.0",
-    "mongodb": "^7.2.0",
-    "parse-duration": "^2.1.6",
+    "envalid": "^8.2.0",
+    "fast-xml-parser": "^5.10.1",
+    "gaxios": "^7.2.0",
+    "mongodb": "^7.5.0",
+    "parse-duration": "^2.1.8",
     "telegraf": "^4.16.3",
     "yup": "^1.7.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@evilmartians/lefthook-installer": "^2.1.9",
+    "@evilmartians/lefthook-installer": "^2.1.10",
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@testcontainers/mongodb": "^12.0.1",
-    "@types/node": "^25.9.1",
-    "eslint": "10.4",
+    "@testcontainers/mongodb": "^12.0.4",
+    "@types/node": "^26.1.1",
+    "eslint": "10.7",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import-x": "^4.16.2",
+    "eslint-plugin-import-x": "^4.17.1",
     "eslint-plugin-prettier": "^5.5.6",
-    "eslint-plugin-unicorn": "^64.0.0",
-    "prettier": "^3.8.3",
+    "eslint-plugin-unicorn": "^72.0.0",
+    "prettier": "^3.9.6",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.60.0",
-    "vitest": "^4.1.7"
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10"
+  },
+  "allowScripts": {
+    "@evilmartians/lefthook-installer@2.1.10": true,
+    "cpu-features@0.0.10": true,
+    "fsevents@2.3.3": true,
+    "protobufjs@7.6.5": true,
+    "ssh2@1.17.0": true,
+    "unrs-resolver@1.12.2": true
   }
 }

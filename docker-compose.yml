@@ -1,0 +1,13 @@
+services:
+  mongo:
+    image: mongo:8
+    environment:
+      - MONGO_INITDB_DATABASE=telegram-youtube-bot
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
+    name: telegram_youtube_bot_mongo_data

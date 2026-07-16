@@ -58,8 +58,6 @@ export const createDelivery = (attrs?: Partial<DeliverySchema>) =>
     createdAt: new Date(),
     nextAttemptAt: new Date(),
     status: "pending",
-    authorName: "name",
-    title: "title",
     attempts: 0,
     ...attrs,
   })

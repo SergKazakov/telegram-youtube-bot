@@ -1,6 +1,7 @@
 import { TelegramError } from "telegraf"
 import { expect, it } from "vitest"
 
+import { buildVideoUrl } from "../__mocks__/utils.mts"
 import { bot } from "../bot/__mocks__/index.mts"
 import { env } from "../env.mts"
 import {
@@ -99,7 +100,7 @@ it("should mark a delivery as delivered after successful retry", async () => {
 
   expect(bot.telegram.sendMessage).toHaveBeenCalledWith(
     "chatId",
-    '<a href="https://www.youtube.com/watch?v=videoId">name – title</a>',
+    `<a href="${buildVideoUrl("videoId")}">name – title</a>`,
     { parse_mode: "HTML" },
   )
 

@@ -1,25 +1,14 @@
-import { Cron } from "croner"
+import { startBot } from "./bot/index.mts"
+import { setupCron } from "./cron/index.mts"
+import { setupDatabase } from "./mongodb.mts"
+import { createServer } from "./server/index.mts"
 
-import { bot, webhook } from "./bot/index.mts"
-import { deliver } from "./cron/deliver.mts"
-import { resubscribeToChannels } from "./cron/resubscribeToChannels.mts"
-import { env } from "./env.mts"
-import { server } from "./server/index.mts"
+await setupDatabase()
 
-server.listen(env.PORT, () => console.log(`Listening on ${env.PORT}`))
+setupCron()
 
-new Cron(
-  "0 0 0 * * *",
-  { catch: error => console.error(error) },
-  resubscribeToChannels,
-)
+const { listen } = createServer()
 
-new Cron(
-  "0 * * * * *",
-  { catch: error => console.error(error), protect: true },
-  deliver,
-)
+await listen()
 
-if (!webhook) {
-  await bot.launch({ allowedUpdates: [] })
-}
+await startBot()
