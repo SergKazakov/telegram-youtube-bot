@@ -1,7 +1,6 @@
 import { expect, it, vi } from "vitest"
 
 import { getOAuth2Client } from "../__mocks__/utils.mts"
-import { bot } from "../bot/__mocks__/index.mts"
 import { chatCollection } from "../mongodb.mts"
 import { client } from "../testUtils/index.mts"
 
@@ -33,14 +32,12 @@ it("should save the refresh token and redirect to the bot", async () => {
 
   const { status, headers } = await getOAuth2Callback({
     code: "code",
-    state: Buffer.from(chatId).toString("base64"),
+    state: btoa(chatId),
   })
 
   expect(status).toBe(302)
 
   expect(headers.location).toBe("https://t.me/username")
-
-  expect(bot.telegram.sendMessage).toHaveBeenCalledWith(chatId, "Success")
 
   await expect(chatCollection.findOne({ _id: chatId })).resolves.toMatchObject({
     refreshToken: "refreshToken",

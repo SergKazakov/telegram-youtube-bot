@@ -2,8 +2,8 @@
 
 ## Code Style
 
-- Run `npx eslint --fix && npx tsc` after code changes
+- Run `bunx eslint --fix && bunx tsc` after code changes
 
 ## Tests
 
-- Run `node --run test` to execute tests
+- Run `bun run test` to execute tests

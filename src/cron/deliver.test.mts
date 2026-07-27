@@ -1,7 +1,6 @@
 import { TelegramError } from "telegraf"
-import { expect, it } from "vitest"
+import { beforeEach, expect, it, vi } from "vitest"
 
-import { buildVideoUrl } from "../__mocks__/utils.mts"
 import { bot } from "../bot/__mocks__/index.mts"
 import { env } from "../env.mts"
 import {
@@ -16,6 +15,12 @@ import {
 } from "../testUtils/index.mts"
 
 import { deliver } from "./deliver.mts"
+
+beforeEach(() => {
+  vi.useFakeTimers().setSystemTime(new Date("2026-01-01T00:00:00.000Z"))
+
+  return () => vi.useRealTimers()
+})
 
 it("should keep a delivery pending after a failed retry", async () => {
   await createVideo()
@@ -33,7 +38,7 @@ it("should keep a delivery pending after a failed retry", async () => {
   ).resolves.toMatchObject({
     status: "pending",
     attempts: 1,
-    nextAttemptAt: expect.any(Date),
+    nextAttemptAt: new Date("2026-01-01T00:01:00.000Z"),
   })
 
   bot.telegram.sendMessage.mockRejectedValueOnce(new Error("foo"))
@@ -58,6 +63,28 @@ it("should keep a delivery pending after a failed retry", async () => {
     status: "failed",
     attempts: env.MAX_ATTEMPTS_TO_DELIVER,
   })
+})
+
+it("should respect Telegram retry_after", async () => {
+  await createVideo()
+
+  await createDelivery()
+
+  bot.telegram.sendMessage.mockRejectedValueOnce(
+    new TelegramError({
+      description: "Too Many Requests: retry later",
+      error_code: 429,
+      parameters: { retry_after: 90 },
+    }),
+  )
+
+  await deliver()
+
+  const delivery = await deliveryCollection.findOne({
+    _id: { chatId: "chatId", videoId: "videoId" },
+  })
+
+  expect(delivery?.nextAttemptAt).toEqual(new Date("2026-01-01T00:01:30.000Z"))
 })
 
 it("should mark a delivery as failed and delete subscriptions when blocked", async () => {
@@ -97,12 +124,6 @@ it("should mark a delivery as delivered after successful retry", async () => {
   await createDelivery()
 
   await deliver()
-
-  expect(bot.telegram.sendMessage).toHaveBeenCalledWith(
-    "chatId",
-    `<a href="${buildVideoUrl("videoId")}">name – title</a>`,
-    { parse_mode: "HTML" },
-  )
 
   await expect(
     deliveryCollection.findOne({

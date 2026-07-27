@@ -1,26 +1,22 @@
-import { type AddressInfo } from "node:net"
-
 import { beforeAll, beforeEach, vi } from "vitest"
 
-process.env.MONGODB_URL = `${process.env.MONGODB_CONNECTION_STRING}/${process.env.VITEST_POOL_ID}?directConnection=true`
+Bun.env.MONGODB_URL = `${Bun.env.MONGODB_CONNECTION_STRING}/${Bun.env.VITEST_POOL_ID}`
 
 vi.mock("../bot/index.mts")
 
 vi.mock("../utils.mts")
 
 beforeAll(async () => {
-  const { createServer } = await import("../server/index.mts")
-
-  const { server, listen } = createServer(0)
-
-  const close = await listen()
+  const { createServer } = await import("../server/createServer.mts")
 
   const { setupClient } = await import("./index.mts")
 
-  setupClient((server.address() as AddressInfo).port)
+  const server = createServer()
+
+  setupClient(server.url.port)
 
   return async () => {
-    await close()
+    await server.stop()
 
     const { mongoClient } = await import("../mongodb.mts")
 
@@ -29,7 +25,9 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
-  const { db } = await import("../mongodb.mts")
+  const { db, setupDatabase } = await import("../mongodb.mts")
 
   await db.dropDatabase()
+
+  await setupDatabase()
 })

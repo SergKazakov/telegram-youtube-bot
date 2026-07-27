@@ -1,7 +1,6 @@
-import { type IncomingMessage } from "node:http"
-
 import { type youtube_v3 as youtubeV3 } from "@googleapis/youtube"
 import { auth, youtube } from "@googleapis/youtube"
+import axios from "axios"
 import parse from "parse-duration"
 import * as yup from "yup"
 
@@ -9,11 +8,8 @@ import { env } from "./env.mts"
 
 export const parseSearchParams = <T extends yup.AnySchema>(
   schema: (y: typeof yup) => T,
-  req: IncomingMessage,
-) =>
-  schema(yup).validate(
-    Object.fromEntries(new URL(req.url as string, env.PUBLIC_URL).searchParams),
-  )
+  request: Request,
+) => schema(yup).validate(Object.fromEntries(new URL(request.url).searchParams))
 
 export const getOAuth2Client = () =>
   new auth.OAuth2(
@@ -71,18 +67,18 @@ export const buildVideoUrl = (videoId: string) =>
   `${youtubeBaseUrl}/watch?v=${videoId}`
 
 export const buildFeedUrl = (channelId: string) =>
-  `${youtubeBaseUrl}/xml/feeds/videos.xml?channel_id=${channelId}`
+  `${youtubeBaseUrl}/feeds/videos.xml?channel_id=${channelId}`
 
 export const subscribeToChannel = (id: string) =>
-  fetch("https://pubsubhubbub.appspot.com", {
-    method: "POST",
-    body: new URLSearchParams([
+  axios.post(
+    "https://pubsubhubbub.appspot.com",
+    new URLSearchParams([
       ["hub.callback", `${env.PUBLIC_URL}/pubsubhubbub`],
       ["hub.mode", "subscribe"],
       ["hub.topic", buildFeedUrl(id)],
       ["hub.verify", "async"],
     ]),
-  })
+  )
 
 export const isShorts = async (id: string) => {
   try {

@@ -15,7 +15,7 @@ async function* getAllSubscriptions(refreshToken: string) {
       refreshToken,
     })
 
-    yield items
+    yield* items
 
     pageToken = nextPageToken
   } while (pageToken)
@@ -26,18 +26,30 @@ export const subscribe: MiddlewareFn<Context> = async ctx => {
 
   const channels: string[] = []
 
-  for await (const subscriptions of getAllSubscriptions(chat.refreshToken)) {
-    for (const it of subscriptions) {
-      try {
-        await subscribeToChannel(it.channelId)
+  for await (const it of getAllSubscriptions(chat.refreshToken)) {
+    try {
+      await subscribeToChannel(it.channelId)
 
-        channels.push(it.channelId)
-
-        await subscriptionCollection.insertOne({
-          _id: { channelId: it.channelId, chatId: chat._id },
-        })
-      } catch {}
+      channels.push(it.channelId)
+    } catch (error) {
+      console.error(
+        `Failed to subscribe to ${it.channelId}:`,
+        error instanceof Error ? error.message : error,
+      )
     }
+  }
+
+  if (channels.length > 0) {
+    await subscriptionCollection.bulkWrite(
+      channels.map(channelId => ({
+        updateOne: {
+          filter: { _id: { channelId, chatId: chat._id } },
+          update: { $setOnInsert: { _id: { channelId, chatId: chat._id } } },
+          upsert: true,
+        },
+      })),
+      { ordered: false },
+    )
   }
 
   await subscriptionCollection.deleteMany({

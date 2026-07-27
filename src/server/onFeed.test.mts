@@ -10,9 +10,10 @@ import {
 import { deliveryCollection, videoCollection } from "../mongodb.mts"
 import { client, createChatSubscription } from "../testUtils/index.mts"
 
-const createFeed = (published = new Date()) =>
-  /* HTML */
-  `
+const createFeed = (published: Date | null = new Date()) => {
+  const updated = new Date().toISOString()
+
+  return /* HTML */ `
     <?xml version='1.0' encoding='UTF-8'?>
     <feed
       xmlns:yt="http://www.youtube.com/xml/schemas/2015"
@@ -21,7 +22,7 @@ const createFeed = (published = new Date()) =>
       <link rel="hub" href="https://pubsubhubbub.appspot.com" />
       <link rel="self" href="${buildFeedUrl("channelId")}" />
       <title>YouTube video feed</title>
-      <updated>${published.toISOString()}</updated>
+      <updated>${updated}</updated>
       <entry>
         <id>yt:video:videoId</id>
         <yt:videoId>videoId</yt:videoId>
@@ -32,11 +33,12 @@ const createFeed = (published = new Date()) =>
           <name>name</name>
           <uri>${buildChannelUrl("channelId")}</uri>
         </author>
-        <published>${published.toISOString()}</published>
-        <updated>${published.toISOString()}</updated>
+        ${published ? `<published>${published.toISOString()}</published>` : ""}
+        <updated>${updated}</updated>
       </entry>
     </feed>
   `
+}
 
 const postPubSubHubBub = (xml: string) =>
   client.post("/pubsubhubbub", xml, {
@@ -47,6 +49,16 @@ it("should return 400", async () => {
   const { status } = await postPubSubHubBub("")
 
   expect(status).toBe(400)
+})
+
+it("should accept feed without published field", async () => {
+  const { status } = await postPubSubHubBub(createFeed(null))
+
+  expect(status).toBe(204)
+
+  await expect(videoCollection.findOne()).resolves.toBeNull()
+
+  await expect(deliveryCollection.findOne()).resolves.toBeNull()
 })
 
 it("should not process videos older than 24 hours", async () => {

@@ -20,7 +20,7 @@ async function* getDeliveries() {
 
   let count = 0
 
-  for (;;) {
+  while (count++ < BATCH_SIZE) {
     const doc = await deliveryCollection.findOneAndUpdate(
       { nextAttemptAt: { $lte: now }, status: "pending" },
       { $set: { status: "processing" } },
@@ -31,13 +31,26 @@ async function* getDeliveries() {
       },
     )
 
-    if (!doc || ++count >= BATCH_SIZE) {
+    if (!doc) {
       break
     }
 
     yield doc
   }
 }
+
+const getNextAttemptAt = (error: unknown, attempts: number) =>
+  dayjs()
+    .add(
+      Math.max(
+        60 * 2 ** (attempts - 1),
+        error instanceof TelegramError && error.code === 429
+          ? (error.parameters?.retry_after ?? 0)
+          : 0,
+      ),
+      "s",
+    )
+    .toDate()
 
 export const deliver = async () => {
   const deliveries: DeliverySchema[] = []
@@ -118,9 +131,7 @@ export const deliver = async () => {
           update: {
             $set: {
               ...(attempts < env.MAX_ATTEMPTS_TO_DELIVER && {
-                nextAttemptAt: dayjs()
-                  .add(2 ** (attempts - 1), "m")
-                  .toDate(),
+                nextAttemptAt: getNextAttemptAt(error, attempts),
               }),
               status:
                 attempts >= env.MAX_ATTEMPTS_TO_DELIVER ? "failed" : "pending",

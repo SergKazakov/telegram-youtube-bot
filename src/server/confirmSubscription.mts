@@ -1,12 +1,12 @@
-import { type ServerResponse } from "node:http"
-
 import { parseSearchParams } from "../utils.mts"
 
-export const confirmSubscription = async (res: ServerResponse) => {
+import { type RequestHandler } from "./types.mts"
+
+export const confirmSubscription: RequestHandler = async request => {
   const { "hub.challenge": challenge } = await parseSearchParams(
     yup => yup.object({ "hub.challenge": yup.string().trim().required() }),
-    res.req,
+    request,
   )
 
-  res.writeHead(200, { "Content-Type": "text/plain" }).end(challenge)
+  return new Response(challenge, { headers: { "Content-Type": "text/plain" } })
 }
