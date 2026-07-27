@@ -1,5 +1,3 @@
-import { type IncomingMessage } from "node:http"
-
 import { type youtube_v3 as youtubeV3 } from "@googleapis/youtube"
 import { auth, youtube } from "@googleapis/youtube"
 import parse from "parse-duration"
@@ -9,11 +7,8 @@ import { env } from "./env.mts"
 
 export const parseSearchParams = <T extends yup.AnySchema>(
   schema: (y: typeof yup) => T,
-  req: IncomingMessage,
-) =>
-  schema(yup).validate(
-    Object.fromEntries(new URL(req.url as string, env.PUBLIC_URL).searchParams),
-  )
+  request: Request,
+) => schema(yup).validate(Object.fromEntries(new URL(request.url).searchParams))
 
 export const getOAuth2Client = () =>
   new auth.OAuth2(

@@ -1,6 +1,3 @@
-import { type ServerResponse } from "node:http"
-import { text } from "node:stream/consumers"
-
 import dayjs from "dayjs"
 import { XMLParser } from "fast-xml-parser"
 import * as yup from "yup"
@@ -12,6 +9,8 @@ import {
   videoCollection,
 } from "../mongodb.mts"
 import { isShorts } from "../utils.mts"
+
+import { type RequestHandler } from "./types.mts"
 
 const schema = yup.object({
   feed: yup
@@ -31,8 +30,8 @@ const schema = yup.object({
 
 const xmlParser = new XMLParser()
 
-export const onFeed = async (res: ServerResponse) => {
-  const rawBody = await text(res.req)
+export const onFeed: RequestHandler = async request => {
+  const rawBody = await request.text()
 
   console.log(rawBody)
 
@@ -40,13 +39,13 @@ export const onFeed = async (res: ServerResponse) => {
     feed: { entry },
   } = await schema.validate(xmlParser.parse(rawBody))
 
-  res.statusCode = 204
+  const response = new Response(null, { status: 204 })
 
   if (
     dayjs().diff(entry.published, "d", true) > 1
     || (await isShorts(entry["yt:videoId"]))
   ) {
-    return res.end()
+    return response
   }
 
   try {
@@ -57,30 +56,25 @@ export const onFeed = async (res: ServerResponse) => {
       title: entry.title,
     })
   } catch {
-    return res.end()
+    return response
   }
-
-  const cursor = subscriptionCollection.find({
-    "_id.channelId": entry["yt:channelId"],
-  })
-
-  const rows: DeliverySchema[] = []
 
   const createdAt = new Date()
 
-  for await (const it of cursor) {
-    rows.push({
+  const rows = await subscriptionCollection
+    .find({ "_id.channelId": entry["yt:channelId"] })
+    .map<DeliverySchema>(it => ({
       _id: { chatId: it._id.chatId, videoId: entry["yt:videoId"] },
       createdAt,
       nextAttemptAt: createdAt,
-      status: "pending",
+      status: "pending" as const,
       attempts: 0,
-    })
-  }
+    }))
+    .toArray()
 
   if (rows.length > 0) {
     await deliveryCollection.insertMany(rows)
   }
 
-  return res.end()
+  return response
 }

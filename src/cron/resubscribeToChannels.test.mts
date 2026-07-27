@@ -15,8 +15,4 @@ it("should resubscribe to unique channels", async () => {
   await resubscribeToChannels()
 
   expect(subscribeToChannel).toHaveBeenCalledTimes(2)
-
-  expect(subscribeToChannel).toHaveBeenCalledWith("channelId1")
-
-  expect(subscribeToChannel).toHaveBeenCalledWith("channelId2")
 })

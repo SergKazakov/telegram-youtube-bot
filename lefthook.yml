@@ -3,7 +3,7 @@ pre-commit:
   commands:
     eslint:
       glob: "*.{mjs,mts}"
-      run: npx eslint --fix --cache {staged_files} && git add {staged_files}
+      run: bunx eslint --fix --cache {staged_files} && git add {staged_files}
     tsc:
       glob: "*.mts"
-      run: npx tsc
+      run: bunx tsc

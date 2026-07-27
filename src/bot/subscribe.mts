@@ -1,6 +1,8 @@
 import { type youtube_v3 as youtubeV3 } from "@googleapis/youtube"
+import pMap from "p-map"
 import { type Context, type MiddlewareFn } from "telegraf"
 
+import { env } from "../env.mts"
 import { subscriptionCollection } from "../mongodb.mts"
 import { getSubscriptions, subscribeToChannel } from "../utils.mts"
 
@@ -27,17 +29,28 @@ export const subscribe: MiddlewareFn<Context> = async ctx => {
   const channels: string[] = []
 
   for await (const subscriptions of getAllSubscriptions(chat.refreshToken)) {
-    for (const it of subscriptions) {
-      try {
+    await pMap(
+      subscriptions,
+      async it => {
         await subscribeToChannel(it.channelId)
 
         channels.push(it.channelId)
+      },
+      { concurrency: env.SUBSCRIPTION_CONCURRENCY, stopOnError: false },
+    )
+  }
 
-        await subscriptionCollection.insertOne({
-          _id: { channelId: it.channelId, chatId: chat._id },
-        })
-      } catch {}
-    }
+  if (channels.length > 0) {
+    await subscriptionCollection.bulkWrite(
+      channels.map(channelId => ({
+        updateOne: {
+          filter: { _id: { channelId, chatId: chat._id } },
+          update: { $setOnInsert: { _id: { channelId, chatId: chat._id } } },
+          upsert: true,
+        },
+      })),
+      { ordered: false },
+    )
   }
 
   await subscriptionCollection.deleteMany({
