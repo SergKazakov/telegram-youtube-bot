@@ -28,13 +28,6 @@ export const bot = new Telegraf(env.BOT_TOKEN)
   .action(/^updateChannelList:(.*)$/, updateChannelList)
   .action(/^openChannel:(.+)$/, openChannel)
 
-export const webhook =
-  new URL(env.PUBLIC_URL).protocol === "https:"
-    ? await bot.createWebhook({ domain: env.PUBLIC_URL, allowed_updates: [] })
-    : null
-
 export const startBot = async () => {
-  if (!webhook) {
-    await bot.launch({ allowedUpdates: [] })
-  }
+  await bot.launch({ allowedUpdates: [] })
 }

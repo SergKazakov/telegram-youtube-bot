@@ -17,7 +17,7 @@ const replyWithAuth = (ctx: Context, chatId: string) =>
           access_type: "offline",
           prompt: "consent",
           scope: ["https://www.googleapis.com/auth/youtube"],
-          state: Buffer.from(chatId).toString("base64"),
+          state: btoa(chatId),
         }),
       ),
     ]),

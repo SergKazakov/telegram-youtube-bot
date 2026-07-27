@@ -1,14 +1,14 @@
 import { startBot } from "./bot/index.mts"
 import { setupCron } from "./cron/index.mts"
 import { setupDatabase } from "./mongodb.mts"
-import { createServer } from "./server/index.mts"
+import { createServer } from "./server/createServer.mts"
 
 await setupDatabase()
 
 setupCron()
 
-const { listen } = createServer()
+const server = createServer()
 
-await listen()
+console.log(`Listening on ${server.url.port}`)
 
 await startBot()

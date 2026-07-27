@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
     "allowImportingTsExtensions": true,
-    "module": "NodeNext",
+    "lib": ["ESNext"],
+    "module": "preserve",
+    "moduleDetection": "force",
     "noEmit": true,
     "skipLibCheck": true,
-    "strict": true
+    "target": "ESNext",
+    "types": ["bun"]
   }
 }

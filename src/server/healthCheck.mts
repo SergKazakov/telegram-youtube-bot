@@ -1,15 +1,15 @@
-import { type ServerResponse } from "node:http"
-
 import { db } from "../mongodb.mts"
 
-export const healthCheck = async (res: ServerResponse) => {
-  let statusCode = 204
+import { type RequestHandler } from "./types.mts"
+
+export const healthCheck: RequestHandler = async () => {
+  let status = 204
 
   try {
     await db.command({ ping: 1 })
   } catch {
-    statusCode = 503
+    status = 503
   }
 
-  res.writeHead(statusCode).end()
+  return new Response(null, { status })
 }

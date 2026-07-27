@@ -13,7 +13,7 @@ import {
 
 export let client: AxiosInstance
 
-export const setupClient = (port: number) => {
+export const setupClient = (port: URL["port"]) => {
   client = axios.create({
     baseURL: `http://localhost:${port}`,
     maxRedirects: 0,

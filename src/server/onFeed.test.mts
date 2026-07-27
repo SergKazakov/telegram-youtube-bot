@@ -11,7 +11,9 @@ import { deliveryCollection, videoCollection } from "../mongodb.mts"
 import { client, createChatSubscription } from "../testUtils/index.mts"
 
 const createFeed = (published = new Date()) =>
-  /* HTML */
+  /*
+  HTML
+  */
   `
     <?xml version='1.0' encoding='UTF-8'?>
     <feed

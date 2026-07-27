@@ -1,22 +1,22 @@
-import { type ServerResponse } from "node:http"
-
 import { bot } from "../bot/index.mts"
 import { chatCollection } from "../mongodb.mts"
 import { getOAuth2Client, parseSearchParams } from "../utils.mts"
 
-export const oAuth2Callback = async (res: ServerResponse) => {
+import { type RequestHandler } from "./types.mts"
+
+export const oAuth2Callback: RequestHandler = async request => {
   const { code, state } = await parseSearchParams(
     yup =>
       yup.object({
         code: yup.string().trim().required(),
         state: yup.string().trim().required(),
       }),
-    res.req,
+    request,
   )
 
   const { tokens } = await getOAuth2Client().getToken(code)
 
-  const chatId = Buffer.from(state, "base64").toString()
+  const chatId = atob(state)
 
   await chatCollection.updateOne(
     { _id: chatId },
@@ -26,7 +26,5 @@ export const oAuth2Callback = async (res: ServerResponse) => {
 
   await bot.telegram.sendMessage(chatId, "Success")
 
-  res
-    .writeHead(302, { Location: `https://t.me/${bot.botInfo?.username}` })
-    .end()
+  return Response.redirect(`https://t.me/${bot.botInfo?.username}`)
 }
