@@ -78,6 +78,7 @@ export const subscribeToChannel = (id: string) =>
       ["hub.topic", buildFeedUrl(id)],
       ["hub.verify", "async"],
     ]),
+    { timeout: 5000 },
   )
 
 export const isShorts = async (id: string) => {

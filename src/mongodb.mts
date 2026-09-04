@@ -12,6 +12,16 @@ export type AuthenticatedChatSchema = ChatSchema & { refreshToken: string }
 
 export const chatCollection = db.collection<ChatSchema>("chats")
 
+export type ChannelSchema = {
+  _id: string
+  nextAttemptAt: Date
+  lastRequestedAt: Date | null
+  lastConfirmedAt: Date | null
+  lockedAt: Date | null
+}
+
+export const channelCollection = db.collection<ChannelSchema>("channels")
+
 export type SubscriptionSchema = { _id: { channelId: string; chatId: string } }
 
 export const subscriptionCollection =
@@ -37,5 +47,7 @@ export type DeliverySchema = {
 export const deliveryCollection = db.collection<DeliverySchema>("deliveries")
 
 export const setupDatabase = async () => {
+  await channelCollection.createIndex({ nextAttemptAt: 1, lockedAt: 1 })
+
   await deliveryCollection.createIndex({ status: 1, nextAttemptAt: 1 })
 }
