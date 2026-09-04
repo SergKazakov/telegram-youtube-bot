@@ -1,10 +1,15 @@
 import axios, { type AxiosInstance } from "axios"
+import { type Filter } from "mongodb"
+import { expect } from "vitest"
 
 import {
+  type ChannelSchema,
   type ChatSchema,
+  DEFAULT_CHANNEL,
   type DeliverySchema,
   type SubscriptionSchema,
   type VideoSchema,
+  channelCollection,
   chatCollection,
   deliveryCollection,
   subscriptionCollection,
@@ -13,10 +18,10 @@ import {
 
 export let client: AxiosInstance
 
-export const setupClient = (port: URL["port"]) => {
+export const setupClient = (unix: string) => {
   client = axios.create({
-    baseURL: `http://localhost:${port}`,
     maxRedirects: 0,
+    socketPath: unix,
     validateStatus: () => true,
   })
 }
@@ -25,6 +30,13 @@ export const createChat = (attrs?: Partial<ChatSchema>) =>
   chatCollection.insertOne({
     _id: "chatId",
     refreshToken: "refreshToken",
+    ...attrs,
+  })
+
+export const createChannel = (attrs?: Partial<ChannelSchema>) =>
+  channelCollection.insertOne({
+    ...DEFAULT_CHANNEL,
+    _id: "channelId",
     ...attrs,
   })
 
@@ -57,7 +69,32 @@ export const createDelivery = (attrs?: Partial<DeliverySchema>) =>
     _id: { chatId: "chatId", videoId: "videoId" },
     createdAt: new Date(),
     nextAttemptAt: new Date(),
+    lockedAt: null,
     status: "pending",
     attempts: 0,
     ...attrs,
   })
+
+export const expectCounts = async (videos: number, deliveries: number) => {
+  await expect(videoCollection.countDocuments()).resolves.toBe(videos)
+
+  await expect(deliveryCollection.countDocuments()).resolves.toBe(deliveries)
+}
+
+export const expectChannel = async (
+  attrs: Omit<Partial<ChannelSchema>, "_id"> | null,
+  filter: Filter<ChannelSchema> = {},
+) => {
+  const channel = await channelCollection.findOne({
+    _id: "channelId",
+    ...filter,
+  })
+
+  if (attrs === null) {
+    expect(channel).toBeNull()
+
+    return
+  }
+
+  expect(channel).toMatchObject(attrs)
+}

@@ -7,9 +7,9 @@ import { healthCheck } from "./healthCheck.mts"
 import { oAuth2Callback } from "./oAuth2Callback.mts"
 import { onFeed } from "./onFeed.mts"
 
-export const createServer = () =>
+export const createServer = (unix?: string) =>
   Bun.serve({
-    port: Bun.env.NODE_ENV === "test" ? 0 : env.PORT,
+    ...(unix ? { unix } : { port: env.PORT }),
     routes: {
       "/healthcheck": { HEAD: healthCheck },
       "/pubsubhubbub": { GET: confirmSubscription, POST: onFeed },

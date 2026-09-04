@@ -1,24 +1,67 @@
 import { expect, it } from "vitest"
 
-import { client } from "../testUtils/index.mts"
+import { client, createChannel, expectChannel } from "../testUtils/index.mts"
+import { buildFeedUrlToSubscribe } from "../utils.mts"
 
-const getPubSubHubBub = (params?: Record<string, string>) =>
-  client("/pubsubhubbub", { params })
+const send = async (params: Record<string, string>) => {
+  const response = await client("/pubsubhubbub", { params })
 
-it("should return 400", async () => {
-  const { status } = await getPubSubHubBub()
+  if (response.status === 400) {
+    return response
+  }
 
-  expect(status).toBe(400)
+  expect(response.status).toBe(200)
+
+  expect(response.headers["content-type"]).toBe("text/plain")
+
+  expect(response.data).toBe("challenge")
+
+  return response
+}
+
+const buildParams = (value?: Record<string, string>) => ({
+  "hub.challenge": "challenge",
+  "hub.topic": buildFeedUrlToSubscribe("channelId"),
+  "hub.mode": "subscribe",
+  ...value,
 })
 
-it("should return the challenge from hub.challenge query param", async () => {
-  const { status, data, headers } = await getPubSubHubBub({
-    "hub.challenge": "challenge",
-  })
+it("should return 400", async () => {
+  {
+    const { status } = await send({})
 
-  expect(status).toBe(200)
+    expect(status).toBe(400)
+  }
 
-  expect(headers["content-type"]).toBe("text/plain")
+  {
+    const { status } = await send(
+      buildParams({ "hub.topic": "https://foo.com" }),
+    )
 
-  expect(data).toBe("challenge")
+    expect(status).toBe(400)
+  }
+})
+
+it("should ignore the stale verification", async () => {
+  await createChannel()
+
+  await send(buildParams())
+
+  await expectChannel({ lastConfirmedAt: null })
+})
+
+it("should unsubscribe", async () => {
+  await createChannel({ lastRequestedAt: new Date() })
+
+  await send(buildParams({ "hub.mode": "unsubscribe" }))
+
+  await expectChannel(null)
+})
+
+it("should subscribe", async () => {
+  await createChannel({ lastRequestedAt: new Date() })
+
+  await send(buildParams())
+
+  await expectChannel({ lastConfirmedAt: expect.any(Date) })
 })
