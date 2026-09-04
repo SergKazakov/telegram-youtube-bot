@@ -1,10 +1,12 @@
 import axios, { type AxiosInstance } from "axios"
 
 import {
+  type ChannelSchema,
   type ChatSchema,
   type DeliverySchema,
   type SubscriptionSchema,
   type VideoSchema,
+  channelCollection,
   chatCollection,
   deliveryCollection,
   subscriptionCollection,
@@ -25,6 +27,16 @@ export const createChat = (attrs?: Partial<ChatSchema>) =>
   chatCollection.insertOne({
     _id: "chatId",
     refreshToken: "refreshToken",
+    ...attrs,
+  })
+
+export const createChannel = (attrs?: Partial<ChannelSchema>) =>
+  channelCollection.insertOne({
+    _id: "channelId",
+    nextAttemptAt: new Date(0),
+    lastRequestedAt: null,
+    lastConfirmedAt: null,
+    lockedAt: null,
     ...attrs,
   })
 

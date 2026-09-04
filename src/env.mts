@@ -4,6 +4,7 @@ export const env = cleanEnv(Bun.env, {
   BOT_TOKEN: str({ testDefault: "" }),
   GOOGLE_CLIENT_ID: str({ testDefault: "" }),
   GOOGLE_CLIENT_SECRET: str({ testDefault: "" }),
+  HUB_TIMEOUT: num({ default: 30_000 }),
   MAX_ATTEMPTS_TO_DELIVER: num({ default: 5 }),
   MONGODB_URL: url({
     default: "mongodb://localhost:27017/telegram-youtube-bot",
