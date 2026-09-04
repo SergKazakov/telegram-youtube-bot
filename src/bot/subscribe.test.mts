@@ -1,8 +1,12 @@
 import { Context, Telegram } from "telegraf"
 import { expect, it, vi } from "vitest"
 
-import { getSubscriptions, subscribeToChannel } from "../__mocks__/utils.mts"
-import { subscriptionCollection } from "../mongodb.mts"
+import { getSubscriptions } from "../__mocks__/utils.mts"
+import {
+  DEFAULT_CHANNEL,
+  channelCollection,
+  subscriptionCollection,
+} from "../mongodb.mts"
 import {
   createChat,
   createChatSubscription,
@@ -52,7 +56,7 @@ it("should delete stale subscriptions when youtube subscriptions are empty", asy
 
   await subscribe(ctx, vi.fn())
 
-  expect(ctx.reply).toHaveBeenCalledWith("You were subscribed to 0 channels")
+  expect(ctx.reply).toHaveBeenCalledWith("Queued 0 channels for subscription")
 
   await expect(subscriptionCollection.findOne()).resolves.toBeNull()
 })
@@ -78,9 +82,16 @@ it("should subscribe to channels and delete stale subscriptions", async () => {
 
   await subscribe(ctx, vi.fn())
 
-  expect(subscribeToChannel).toHaveBeenCalledWith("2")
+  expect(ctx.reply).toHaveBeenCalledWith("Queued 2 channels for subscription")
 
-  expect(ctx.reply).toHaveBeenCalledWith("You were subscribed to 2 channels")
+  const attrs = { ...DEFAULT_CHANNEL, nextAttemptAt: expect.any(Date) }
+
+  await expect(
+    channelCollection.find().sort({ _id: 1 }).toArray(),
+  ).resolves.toEqual([
+    { ...attrs, _id: "1" },
+    { ...attrs, _id: "2" },
+  ])
 
   await expect(
     subscriptionCollection

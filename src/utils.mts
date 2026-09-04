@@ -1,15 +1,14 @@
 import { type youtube_v3 as youtubeV3 } from "@googleapis/youtube"
 import { auth, youtube } from "@googleapis/youtube"
-import axios from "axios"
-import parse from "parse-duration"
-import * as yup from "yup"
+import dayjs from "dayjs"
+import type * as yup from "yup"
 
 import { env } from "./env.mts"
 
 export const parseSearchParams = <T extends yup.AnySchema>(
-  schema: (y: typeof yup) => T,
+  schema: T,
   request: Request,
-) => schema(yup).validate(Object.fromEntries(new URL(request.url).searchParams))
+) => schema.validate(Object.fromEntries(new URL(request.url).searchParams))
 
 export const getOAuth2Client = () =>
   new auth.OAuth2(
@@ -17,6 +16,39 @@ export const getOAuth2Client = () =>
     env.GOOGLE_CLIENT_SECRET,
     `${env.PUBLIC_URL}/oauth2callback`,
   )
+
+const hmac = (data: string) =>
+  new Bun.CryptoHasher("sha256", env.OAUTH_SECRET).update(data).digest("hex")
+
+export const signState = (chatId: string) => {
+  const ts = Date.now()
+
+  return btoa(`${chatId}.${ts}.${hmac(`${chatId}.${ts}`)}`)
+}
+
+export const verifyState = (state: string) => {
+  let decoded: string
+
+  try {
+    decoded = atob(state)
+  } catch {
+    return null
+  }
+
+  const [chatId, ts, signature] = decoded.split(".", 3)
+
+  if (
+    !chatId
+    || !ts
+    || !signature
+    || signature !== hmac(`${chatId}.${ts}`)
+    || dayjs().diff(Number(ts), "m") > 10
+  ) {
+    return null
+  }
+
+  return chatId
+}
 
 export const getYoutubeClient = (refreshToken: string) => {
   const auth = getOAuth2Client()
@@ -58,47 +90,16 @@ export const getSubscriptions = async ({
   }
 }
 
-const youtubeBaseUrl = "https://www.youtube.com"
+export const youtubeBaseUrl = "https://www.youtube.com"
 
 export const buildChannelUrl = (channelId: string) =>
   `${youtubeBaseUrl}/channel/${channelId}`
 
-export const buildVideoUrl = (videoId: string) =>
-  `${youtubeBaseUrl}/watch?v=${videoId}`
-
-export const buildFeedUrl = (channelId: string) =>
+export const buildFeedUrlToPoll = (channelId: string) =>
   `${youtubeBaseUrl}/feeds/videos.xml?channel_id=${channelId}`
 
-export const subscribeToChannel = (id: string) =>
-  axios.post(
-    "https://pubsubhubbub.appspot.com",
-    new URLSearchParams([
-      ["hub.callback", `${env.PUBLIC_URL}/pubsubhubbub`],
-      ["hub.mode", "subscribe"],
-      ["hub.topic", buildFeedUrl(id)],
-      ["hub.verify", "async"],
-    ]),
-  )
+export const buildFeedUrlToSubscribe = (channelId: string) =>
+  `${youtubeBaseUrl}/xml/feeds/videos.xml?channel_id=${channelId}`
 
-export const isShorts = async (id: string) => {
-  try {
-    const {
-      data: { items },
-    } = await youtube({
-      version: "v3",
-      auth: env.YOUTUBE_API_TOKEN,
-    }).videos.list({ part: ["contentDetails"], id: [id] })
-
-    const duration = items?.[0]?.contentDetails?.duration
-
-    if (!duration) {
-      return false
-    }
-
-    const ms = parse(duration)
-
-    return ms !== null && ms > 0 && ms <= 180_000
-  } catch {
-    return false
-  }
-}
+export const buildVideoUrl = (videoId: string) =>
+  `${youtubeBaseUrl}/watch?v=${videoId}`

@@ -8,7 +8,5 @@ export default async function globalSetup() {
 
   Bun.env.MONGODB_CONNECTION_STRING = `mongodb://${container.getHost()}:${container.getMappedPort(27_017)}`
 
-  return async () => {
-    await container.stop()
-  }
+  return () => container.stop()
 }

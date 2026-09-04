@@ -1,12 +1,5 @@
-pre-commit:
-  parallel: true
-  commands:
-    dedupe:
-      glob: "package.json"
-      run: bun dedupe --check
-    eslint:
-      glob: "*.{mjs,mts}"
-      run: bunx eslint --fix --cache {staged_files} && git add {staged_files}
-    tsc:
-      glob: "*.mts"
-      run: bunx tsc
+remotes:
+  - git_url: https://gist.github.com/SergKazakov/20267ff562f22ce37d633138d92f2267
+    ref: main
+    configs:
+      - lefthook-bun.yml

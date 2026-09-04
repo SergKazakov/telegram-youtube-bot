@@ -1,37 +1,18 @@
-import dayjs from "dayjs"
-import * as yup from "yup"
-
-import {
-  type DeliverySchema,
-  deliveryCollection,
-  subscriptionCollection,
-  videoCollection,
-} from "../mongodb.mts"
-import { isShorts } from "../utils.mts"
+import { processChannel } from "../cron/pollChannels.mts"
+import { channelCollection } from "../mongodb.mts"
+import { schemaToHandleNotification } from "../schemas.mts"
 
 import { type RequestHandler } from "./types.mts"
 
-const schema = yup.object({
-  feed: yup
-    .object({
-      entry: yup
-        .object({
-          "yt:videoId": yup.string().required(),
-          "yt:channelId": yup.string().required(),
-          title: yup.string().required(),
-          author: yup.object({ name: yup.string().required() }).required(),
-          published: yup.date(),
-        })
-        .required(),
-    })
-    .required(),
-})
-
-const parseXml = (input: string) => {
+const getEntry = async (input: string) => {
   try {
-    return Bun.XML.parse(input.trim())
+    const { feed } = await schemaToHandleNotification.validate(
+      Bun.XML.parse(input.trim()),
+    )
+
+    return feed.entry
   } catch {
-    throw new yup.ValidationError("Invalid XML")
+    return null
   }
 }
 
@@ -40,47 +21,15 @@ export const onFeed: RequestHandler = async request => {
 
   console.log(rawBody)
 
-  const {
-    feed: { entry },
-  } = await schema.validate(parseXml(rawBody))
+  const entry = await getEntry(rawBody)
 
-  const response = new Response(null, { status: 204 })
+  const channel = entry
+    ? await channelCollection.findOne({ _id: entry["yt:channelId"] })
+    : null
 
-  if (
-    !entry.published
-    || dayjs().diff(entry.published, "d", true) > 1
-    || (await isShorts(entry["yt:videoId"]))
-  ) {
-    return response
+  if (channel) {
+    await processChannel({ channel, entries: [entry!], markPolled: false })
   }
 
-  try {
-    await videoCollection.insertOne({
-      _id: entry["yt:videoId"],
-      publishedAt: entry.published,
-      authorName: entry.author.name,
-      title: entry.title,
-    })
-  } catch {
-    return response
-  }
-
-  const createdAt = new Date()
-
-  const rows = await subscriptionCollection
-    .find({ "_id.channelId": entry["yt:channelId"] })
-    .map<DeliverySchema>(it => ({
-      _id: { chatId: it._id.chatId, videoId: entry["yt:videoId"] },
-      createdAt,
-      nextAttemptAt: createdAt,
-      status: "pending" as const,
-      attempts: 0,
-    }))
-    .toArray()
-
-  if (rows.length > 0) {
-    await deliveryCollection.insertMany(rows)
-  }
-
-  return response
+  return new Response(null, { status: 204 })
 }
