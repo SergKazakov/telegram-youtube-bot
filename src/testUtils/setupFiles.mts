@@ -6,7 +6,19 @@ vi.mock("../bot/index.mts")
 
 vi.mock("../utils.mts")
 
+let cleanup: () => Promise<void>
+
 beforeAll(async () => {
+  const {
+    cleanup: _cleanup,
+    mongoClient,
+    setupDatabase,
+  } = await import("../mongodb.mts")
+
+  cleanup = _cleanup
+
+  await setupDatabase()
+
   const { createServer } = await import("../server/createServer.mts")
 
   const { setupClient } = await import("./index.mts")
@@ -18,16 +30,8 @@ beforeAll(async () => {
   return async () => {
     await server.stop()
 
-    const { mongoClient } = await import("../mongodb.mts")
-
     await mongoClient.close()
   }
 })
 
-beforeEach(async () => {
-  const { db, setupDatabase } = await import("../mongodb.mts")
-
-  await db.dropDatabase()
-
-  await setupDatabase()
-})
+beforeEach(() => cleanup())

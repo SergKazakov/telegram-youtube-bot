@@ -4,9 +4,11 @@ import type * as Utils from "../utils.mts"
 
 export const {
   buildChannelUrl,
-  buildFeedUrl,
+  buildFeedUrlToSubscribe,
   buildVideoUrl,
   parseSearchParams,
+  signState,
+  verifyState,
 } = await vi.importActual<typeof Utils>("../utils.mts")
 
 export const getOAuth2Client = vi.fn()

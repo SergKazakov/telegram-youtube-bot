@@ -2,7 +2,7 @@ import { GaxiosError } from "gaxios"
 import { type Context, Markup, type MiddlewareFn } from "telegraf"
 
 import { type AuthenticatedChatSchema, chatCollection } from "../mongodb.mts"
-import { getOAuth2Client, getYoutubeClient } from "../utils.mts"
+import { getOAuth2Client, getYoutubeClient, signState } from "../utils.mts"
 
 export const getChat = (ctx: Context) =>
   ctx.state.chat as AuthenticatedChatSchema
@@ -17,7 +17,7 @@ const replyWithAuth = (ctx: Context, chatId: string) =>
           access_type: "offline",
           prompt: "consent",
           scope: ["https://www.googleapis.com/auth/youtube"],
-          state: btoa(chatId),
+          state: signState(chatId),
         }),
       ),
     ]),

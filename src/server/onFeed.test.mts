@@ -1,44 +1,24 @@
 import dayjs from "dayjs"
 import { expect, it } from "vitest"
 
-import {
-  buildChannelUrl,
-  buildFeedUrl,
-  buildVideoUrl,
-  isShorts,
-} from "../__mocks__/utils.mts"
+import { isShorts } from "../__mocks__/utils.mts"
+import { env } from "../env.mts"
 import { deliveryCollection, videoCollection } from "../mongodb.mts"
 import { client, createChatSubscription } from "../testUtils/index.mts"
 
-const createFeed = (published: Date | null = new Date()) => {
-  const updated = new Date().toISOString()
-
-  return /* HTML */ `
-    <?xml version='1.0' encoding='UTF-8'?>
-    <feed
-      xmlns:yt="http://www.youtube.com/xml/schemas/2015"
-      xmlns="http://www.w3.org/2005/Atom"
-    >
-      <link rel="hub" href="https://pubsubhubbub.appspot.com" />
-      <link rel="self" href="${buildFeedUrl("channelId")}" />
-      <title>YouTube video feed</title>
-      <updated>${updated}</updated>
-      <entry>
-        <id>yt:video:videoId</id>
-        <yt:videoId>videoId</yt:videoId>
-        <yt:channelId>channelId</yt:channelId>
-        <title>title</title>
-        <link rel="alternate" href="${buildVideoUrl("videoId")}" />
-        <author>
-          <name>name</name>
-          <uri>${buildChannelUrl("channelId")}</uri>
-        </author>
-        ${published ? `<published>${published.toISOString()}</published>` : ""}
-        <updated>${updated}</updated>
-      </entry>
-    </feed>
-  `
-}
+const createFeed = (published: Date | null = new Date()) => `
+  <feed>
+    <entry>
+      <yt:videoId>videoId</yt:videoId>
+      <yt:channelId>channelId</yt:channelId>
+      <title>title</title>
+      <author>
+        <name>name</name>
+      </author>
+      ${published ? `<published>${published.toISOString()}</published>` : ""}
+    </entry>
+  </feed>
+`
 
 const postPubSubHubBub = (xml: string) =>
   client.post("/pubsubhubbub", xml, {
@@ -63,7 +43,12 @@ it("should accept feed without published field", async () => {
 
 it("should not process videos older than 24 hours", async () => {
   const { status } = await postPubSubHubBub(
-    createFeed(dayjs().subtract(1, "d").subtract(1, "millisecond").toDate()),
+    createFeed(
+      dayjs()
+        .subtract(env.DAYS_TO_IGNORE_VIDEO, "d")
+        .subtract(1, "millisecond")
+        .toDate(),
+    ),
   )
 
   expect(status).toBe(204)

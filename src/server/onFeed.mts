@@ -1,6 +1,7 @@
 import dayjs from "dayjs"
 import * as yup from "yup"
 
+import { env } from "../env.mts"
 import {
   type DeliverySchema,
   deliveryCollection,
@@ -48,7 +49,7 @@ export const onFeed: RequestHandler = async request => {
 
   if (
     !entry.published
-    || dayjs().diff(entry.published, "d", true) > 1
+    || dayjs().diff(entry.published, "d", true) > env.DAYS_TO_IGNORE_VIDEO
     || (await isShorts(entry["yt:videoId"]))
   ) {
     return response

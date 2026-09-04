@@ -1,8 +1,8 @@
 import { Context, Telegram } from "telegraf"
 import { expect, it, vi } from "vitest"
 
-import { getSubscriptions, subscribeToChannel } from "../__mocks__/utils.mts"
-import { subscriptionCollection } from "../mongodb.mts"
+import { getSubscriptions } from "../__mocks__/utils.mts"
+import { channelCollection, subscriptionCollection } from "../mongodb.mts"
 import {
   createChat,
   createChatSubscription,
@@ -52,7 +52,7 @@ it("should delete stale subscriptions when youtube subscriptions are empty", asy
 
   await subscribe(ctx, vi.fn())
 
-  expect(ctx.reply).toHaveBeenCalledWith("You were subscribed to 0 channels")
+  expect(ctx.reply).toHaveBeenCalledWith("Queued 0 channels for subscription")
 
   await expect(subscriptionCollection.findOne()).resolves.toBeNull()
 })
@@ -78,9 +78,26 @@ it("should subscribe to channels and delete stale subscriptions", async () => {
 
   await subscribe(ctx, vi.fn())
 
-  expect(subscribeToChannel).toHaveBeenCalledWith("2")
+  expect(ctx.reply).toHaveBeenCalledWith("Queued 2 channels for subscription")
 
-  expect(ctx.reply).toHaveBeenCalledWith("You were subscribed to 2 channels")
+  await expect(
+    channelCollection.find().sort({ _id: 1 }).toArray(),
+  ).resolves.toEqual([
+    {
+      _id: "1",
+      nextAttemptAt: expect.any(Date),
+      lastRequestedAt: null,
+      lastConfirmedAt: null,
+      lockedAt: null,
+    },
+    {
+      _id: "2",
+      nextAttemptAt: expect.any(Date),
+      lastRequestedAt: null,
+      lastConfirmedAt: null,
+      lockedAt: null,
+    },
+  ])
 
   await expect(
     subscriptionCollection
