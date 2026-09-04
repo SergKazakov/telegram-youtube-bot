@@ -1,13 +1,14 @@
 import dayjs from "dayjs"
 import * as yup from "yup"
 
+import { env } from "../env.mts"
 import {
   type DeliverySchema,
   deliveryCollection,
   subscriptionCollection,
   videoCollection,
 } from "../mongodb.mts"
-import { isShorts } from "../utils.mts"
+import { isShorts, linkSchema } from "../utils.mts"
 
 import { type RequestHandler } from "./types.mts"
 
@@ -19,6 +20,16 @@ const schema = yup.object({
           "yt:videoId": yup.string().required(),
           "yt:channelId": yup.string().required(),
           title: yup.string().required(),
+          link: yup
+            .array()
+            .of(linkSchema)
+            .transform((_, originalValue) =>
+              Array.isArray(originalValue)
+                ? originalValue
+                : originalValue
+                  ? [originalValue]
+                  : [],
+            ),
           author: yup.object({ name: yup.string().required() }).required(),
           published: yup.date(),
         })
@@ -48,8 +59,8 @@ export const onFeed: RequestHandler = async request => {
 
   if (
     !entry.published
-    || dayjs().diff(entry.published, "d", true) > 1
-    || (await isShorts(entry["yt:videoId"]))
+    || dayjs().diff(entry.published, "d", true) > env.DAYS_TO_IGNORE_VIDEO
+    || isShorts(entry.link ?? [])
   ) {
     return response
   }

@@ -3,19 +3,26 @@ import { expect, it, vi } from "vitest"
 import { getOAuth2Client } from "../__mocks__/utils.mts"
 import { chatCollection } from "../mongodb.mts"
 import { client } from "../testUtils/index.mts"
+import { signState } from "../utils.mts"
 
-const getOAuth2Callback = (params: Record<string, string>) =>
+const send = (params: Record<string, string>) =>
   client("/oauth2callback", { params })
 
 it("should return 400", async () => {
   {
-    const { status } = await getOAuth2Callback({ state: "state" })
+    const { status } = await send({ state: "state" })
 
     expect(status).toBe(400)
   }
 
   {
-    const { status } = await getOAuth2Callback({ code: "code" })
+    const { status } = await send({ code: "code" })
+
+    expect(status).toBe(400)
+  }
+
+  {
+    const { status } = await send({ code: "code", state: "state" })
 
     expect(status).toBe(400)
   }
@@ -30,9 +37,9 @@ it("should save the refresh token and redirect to the bot", async () => {
       .mockResolvedValue({ tokens: { refresh_token: "refreshToken" } }),
   })
 
-  const { status, headers } = await getOAuth2Callback({
+  const { status, headers } = await send({
     code: "code",
-    state: btoa(chatId),
+    state: signState(chatId),
   })
 
   expect(status).toBe(302)

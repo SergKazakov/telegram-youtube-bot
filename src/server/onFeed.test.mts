@@ -1,84 +1,55 @@
 import dayjs from "dayjs"
 import { expect, it } from "vitest"
 
-import {
-  buildChannelUrl,
-  buildFeedUrl,
-  buildVideoUrl,
-  isShorts,
-} from "../__mocks__/utils.mts"
+import { env } from "../env.mts"
 import { deliveryCollection, videoCollection } from "../mongodb.mts"
 import { client, createChatSubscription } from "../testUtils/index.mts"
+import { youtubeBaseUrl } from "../utils.mts"
 
-const createFeed = (published: Date | null = new Date()) => {
-  const updated = new Date().toISOString()
+type CreateFeedParams = { published?: Date | null; links?: string[] }
 
-  return /* HTML */ `
-    <?xml version='1.0' encoding='UTF-8'?>
-    <feed
-      xmlns:yt="http://www.youtube.com/xml/schemas/2015"
-      xmlns="http://www.w3.org/2005/Atom"
-    >
-      <link rel="hub" href="https://pubsubhubbub.appspot.com" />
-      <link rel="self" href="${buildFeedUrl("channelId")}" />
-      <title>YouTube video feed</title>
-      <updated>${updated}</updated>
-      <entry>
-        <id>yt:video:videoId</id>
-        <yt:videoId>videoId</yt:videoId>
-        <yt:channelId>channelId</yt:channelId>
-        <title>title</title>
-        <link rel="alternate" href="${buildVideoUrl("videoId")}" />
-        <author>
-          <name>name</name>
-          <uri>${buildChannelUrl("channelId")}</uri>
-        </author>
-        ${published ? `<published>${published.toISOString()}</published>` : ""}
-        <updated>${updated}</updated>
-      </entry>
-    </feed>
-  `
-}
+const createFeed = ({
+  links,
+  published = new Date(),
+}: CreateFeedParams = {}) => /* HTML */ `
+  <feed>
+    <entry>
+      <yt:videoId>videoId</yt:videoId>
+      <yt:channelId>channelId</yt:channelId>
+      <title>title</title>
+      ${links ? links.map(it => `<link href="${it}"/>`).join("") : ""}
+      <author>
+        <name>name</name>
+      </author>
+      ${published ? `<published>${published.toISOString()}</published>` : ""}
+    </entry>
+  </feed>
+`
 
-const postPubSubHubBub = (xml: string) =>
-  client.post("/pubsubhubbub", xml, {
-    headers: { "Content-Type": "application/xml" },
-  })
+const send = (xml: string) => client.post("/pubsubhubbub", xml)
 
 it("should return 400", async () => {
-  const { status } = await postPubSubHubBub("")
+  const { status } = await send("")
 
   expect(status).toBe(400)
 })
 
-it("should accept feed without published field", async () => {
-  const { status } = await postPubSubHubBub(createFeed(null))
+it("should skip entries", async () => {
+  for (const arg of [
+    { published: null },
+    {
+      published: dayjs()
+        .subtract(env.DAYS_TO_IGNORE_VIDEO, "d")
+        .subtract(1, "millisecond")
+        .toDate(),
+    },
+    { links: [`${youtubeBaseUrl}/shorts/foo`] },
+    { links: [`${youtubeBaseUrl}/watch`, `${youtubeBaseUrl}/shorts/foo`] },
+  ] satisfies CreateFeedParams[]) {
+    const { status } = await send(createFeed(arg))
 
-  expect(status).toBe(204)
-
-  await expect(videoCollection.findOne()).resolves.toBeNull()
-
-  await expect(deliveryCollection.findOne()).resolves.toBeNull()
-})
-
-it("should not process videos older than 24 hours", async () => {
-  const { status } = await postPubSubHubBub(
-    createFeed(dayjs().subtract(1, "d").subtract(1, "millisecond").toDate()),
-  )
-
-  expect(status).toBe(204)
-
-  await expect(videoCollection.findOne()).resolves.toBeNull()
-
-  await expect(deliveryCollection.findOne()).resolves.toBeNull()
-})
-
-it("should filter Shorts", async () => {
-  isShorts.mockResolvedValueOnce(true)
-
-  const { status } = await postPubSubHubBub(createFeed())
-
-  expect(status).toBe(204)
+    expect(status).toBe(204)
+  }
 
   await expect(videoCollection.findOne()).resolves.toBeNull()
 
@@ -89,7 +60,7 @@ it("should create deliveries for subscribed chats", async () => {
   await createChatSubscription()
 
   {
-    const { status } = await postPubSubHubBub(createFeed())
+    const { status } = await send(createFeed())
 
     expect(status).toBe(204)
 
@@ -114,7 +85,7 @@ it("should create deliveries for subscribed chats", async () => {
   }
 
   {
-    const { status } = await postPubSubHubBub(createFeed())
+    const { status } = await send(createFeed())
 
     expect(status).toBe(204)
 

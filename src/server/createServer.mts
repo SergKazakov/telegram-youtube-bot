@@ -9,7 +9,7 @@ import { onFeed } from "./onFeed.mts"
 
 export const createServer = () =>
   Bun.serve({
-    port: Bun.env.NODE_ENV === "test" ? 0 : env.PORT,
+    port: env.PORT,
     routes: {
       "/healthcheck": { HEAD: healthCheck },
       "/pubsubhubbub": { GET: confirmSubscription, POST: onFeed },
