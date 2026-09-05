@@ -9,6 +9,7 @@ export const env = cleanEnv(Bun.env, {
   MONGODB_URL: url({
     default: "mongodb://localhost:27017/telegram-youtube-bot",
   }),
+  OAUTH_SECRET: str({ testDefault: "foo" }),
   PORT: port({ default: 4444 }),
   PUBLIC_URL: url({ default: "http://localhost:4444" }),
   YOUTUBE_API_TOKEN: str({ testDefault: "" }),
