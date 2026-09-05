@@ -1,6 +1,7 @@
 import { type youtube_v3 as youtubeV3 } from "@googleapis/youtube"
 import { auth, youtube } from "@googleapis/youtube"
 import axios from "axios"
+import dayjs from "dayjs"
 import parse from "parse-duration"
 import * as yup from "yup"
 
@@ -17,6 +18,39 @@ export const getOAuth2Client = () =>
     env.GOOGLE_CLIENT_SECRET,
     `${env.PUBLIC_URL}/oauth2callback`,
   )
+
+const hmac = (data: string) =>
+  new Bun.CryptoHasher("sha256", env.OAUTH_SECRET).update(data).digest("hex")
+
+export const signState = (chatId: string) => {
+  const ts = Date.now()
+
+  return btoa(`${chatId}.${ts}.${hmac(`${chatId}.${ts}`)}`)
+}
+
+export const verifyState = (state: string) => {
+  let decoded: string
+
+  try {
+    decoded = atob(state)
+  } catch {
+    return null
+  }
+
+  const [chatId, ts, signature] = decoded.split(".", 3)
+
+  if (
+    !chatId
+    || !ts
+    || !signature
+    || signature !== hmac(`${chatId}.${ts}`)
+    || dayjs().diff(Number(ts), "m") > 10
+  ) {
+    return null
+  }
+
+  return chatId
+}
 
 export const getYoutubeClient = (refreshToken: string) => {
   const auth = getOAuth2Client()

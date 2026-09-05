@@ -7,6 +7,8 @@ export const {
   buildFeedUrl,
   buildVideoUrl,
   parseSearchParams,
+  signState,
+  verifyState,
 } = await vi.importActual<typeof Utils>("../utils.mts")
 
 export const getOAuth2Client = vi.fn()
