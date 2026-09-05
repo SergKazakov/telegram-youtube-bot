@@ -19,13 +19,21 @@ export const getOAuth2Client = () =>
     `${env.PUBLIC_URL}/oauth2callback`,
   )
 
-const hmac = (data: string) =>
-  new Bun.CryptoHasher("sha256", env.OAUTH_SECRET).update(data).digest("hex")
+export const createHmac = (
+  data: string,
+  secret: string,
+  algorithm: "sha1" | "sha256" = "sha256",
+) => new Bun.CryptoHasher(algorithm, secret).update(data).digest("hex")
+
+export const signHub = (body: string) =>
+  `sha1=${createHmac(body, env.HUB_SECRET, "sha1")}`
 
 export const signState = (chatId: string) => {
   const ts = Date.now()
 
-  return btoa(`${chatId}.${ts}.${hmac(`${chatId}.${ts}`)}`)
+  return btoa(
+    `${chatId}.${ts}.${createHmac(`${chatId}.${ts}`, env.OAUTH_SECRET)}`,
+  )
 }
 
 export const verifyState = (state: string) => {
@@ -43,7 +51,7 @@ export const verifyState = (state: string) => {
     !chatId
     || !ts
     || !signature
-    || signature !== hmac(`${chatId}.${ts}`)
+    || signature !== createHmac(`${chatId}.${ts}`, env.OAUTH_SECRET)
     || dayjs().diff(Number(ts), "m") > 10
   ) {
     return null
@@ -109,6 +117,7 @@ export const subscribeToChannel = (id: string) =>
     new URLSearchParams([
       ["hub.callback", `${env.PUBLIC_URL}/pubsubhubbub`],
       ["hub.mode", "subscribe"],
+      ["hub.secret", env.HUB_SECRET],
       ["hub.topic", buildFeedUrl(id)],
       ["hub.verify", "async"],
     ]),

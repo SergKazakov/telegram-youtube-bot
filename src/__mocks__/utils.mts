@@ -6,7 +6,9 @@ export const {
   buildChannelUrl,
   buildFeedUrl,
   buildVideoUrl,
+  createHmac,
   parseSearchParams,
+  signHub,
   signState,
   verifyState,
 } = await vi.importActual<typeof Utils>("../utils.mts")

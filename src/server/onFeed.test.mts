@@ -6,6 +6,7 @@ import {
   buildFeedUrl,
   buildVideoUrl,
   isShorts,
+  signHub,
 } from "../__mocks__/utils.mts"
 import { deliveryCollection, videoCollection } from "../mongodb.mts"
 import { client, createChatSubscription } from "../testUtils/index.mts"
@@ -40,10 +41,30 @@ const createFeed = (published: Date | null = new Date()) => {
   `
 }
 
-const postPubSubHubBub = (xml: string) =>
+const postPubSubHubBub = (
+  xml: string,
+  signature: string | null = signHub(xml),
+) =>
   client.post("/pubsubhubbub", xml, {
-    headers: { "Content-Type": "application/xml" },
+    headers: {
+      ...(signature && { "X-Hub-Signature": signature }),
+      "Content-Type": "application/xml",
+    },
   })
+
+it("should return 403", async () => {
+  {
+    const { status } = await postPubSubHubBub(createFeed(), null)
+
+    expect(status).toBe(403)
+  }
+
+  {
+    const { status } = await postPubSubHubBub(createFeed(), "sha1=foo")
+
+    expect(status).toBe(403)
+  }
+})
 
 it("should return 400", async () => {
   const { status } = await postPubSubHubBub("")

@@ -1,3 +1,5 @@
+import { timingSafeEqual } from "node:crypto"
+
 import dayjs from "dayjs"
 import * as yup from "yup"
 
@@ -7,7 +9,7 @@ import {
   subscriptionCollection,
   videoCollection,
 } from "../mongodb.mts"
-import { isShorts } from "../utils.mts"
+import { isShorts, signHub } from "../utils.mts"
 
 import { type RequestHandler } from "./types.mts"
 
@@ -27,6 +29,18 @@ const schema = yup.object({
     .required(),
 })
 
+const isSignatureValid = (body: string, signature: string | null) => {
+  if (!signature) {
+    return false
+  }
+
+  const expected = Buffer.from(signHub(body))
+
+  const actual = Buffer.from(signature)
+
+  return expected.length === actual.length && timingSafeEqual(expected, actual)
+}
+
 const parseXml = (input: string) => {
   try {
     return Bun.XML.parse(input.trim())
@@ -37,6 +51,10 @@ const parseXml = (input: string) => {
 
 export const onFeed: RequestHandler = async request => {
   const rawBody = await request.text()
+
+  if (!isSignatureValid(rawBody, request.headers.get("x-hub-signature"))) {
+    return new Response(null, { status: 403 })
+  }
 
   console.log(rawBody)
 
