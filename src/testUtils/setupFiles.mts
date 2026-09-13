@@ -19,17 +19,7 @@ beforeAll(async () => {
 
   await setupDatabase()
 
-  const { createServer } = await import("../server/createServer.mts")
-
-  const { setupClient } = await import("./index.mts")
-
-  const server = createServer()
-
-  setupClient(server.url.port)
-
   return async () => {
-    await server.stop()
-
     await mongoClient.close()
   }
 })

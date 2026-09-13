@@ -2,27 +2,28 @@ import { expect, it, vi } from "vitest"
 
 import { getOAuth2Client } from "../__mocks__/utils.mts"
 import { chatCollection } from "../mongodb.mts"
-import { client } from "../testUtils/index.mts"
+import { call } from "../testUtils/index.mts"
 import { signState } from "../utils.mts"
 
-const getOAuth2Callback = (params: Record<string, string>) =>
-  client("/oauth2callback", { params })
+const send = (params: URLSearchParams) => call("/oauth2callback", { params })
 
 it("should return 400", async () => {
   {
-    const { status } = await getOAuth2Callback({ state: "state" })
+    const { status } = await send(new URLSearchParams({ state: "state" }))
 
     expect(status).toBe(400)
   }
 
   {
-    const { status } = await getOAuth2Callback({ code: "code" })
+    const { status } = await send(new URLSearchParams({ code: "code" }))
 
     expect(status).toBe(400)
   }
 
   {
-    const { status } = await getOAuth2Callback({ code: "code", state: "state" })
+    const { status } = await send(
+      new URLSearchParams({ code: "code", state: "state" }),
+    )
 
     expect(status).toBe(400)
   }
@@ -37,14 +38,13 @@ it("should save the refresh token and redirect to the bot", async () => {
       .mockResolvedValue({ tokens: { refresh_token: "refreshToken" } }),
   })
 
-  const { status, headers } = await getOAuth2Callback({
-    code: "code",
-    state: signState(chatId),
-  })
+  const { status, headers } = await send(
+    new URLSearchParams({ code: "code", state: signState(chatId) }),
+  )
 
   expect(status).toBe(302)
 
-  expect(headers.location).toBe("https://t.me/username")
+  expect(headers.get("location")).toBe("https://t.me/username")
 
   await expect(chatCollection.findOne({ _id: chatId })).resolves.toMatchObject({
     refreshToken: "refreshToken",

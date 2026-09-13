@@ -7,19 +7,25 @@ import { healthCheck } from "./healthCheck.mts"
 import { oAuth2Callback } from "./oAuth2Callback.mts"
 import { onFeed } from "./onFeed.mts"
 
-export const createServer = () =>
-  Bun.serve({
-    port: Bun.env.NODE_ENV === "test" ? 0 : env.PORT,
-    routes: {
-      "/healthcheck": { HEAD: healthCheck },
-      "/pubsubhubbub": { GET: confirmSubscription, POST: onFeed },
-      "/oauth2callback": { GET: oAuth2Callback },
-    },
-    error(error) {
-      console.error(error)
+export const app = async (request: Request) => {
+  try {
+    const handler = {
+      "HEAD/healthcheck": healthCheck,
+      "GET/pubsubhubbub": confirmSubscription,
+      "POST/pubsubhubbub": onFeed,
+      "GET/oauth2callback": oAuth2Callback,
+    }[request.method + new URL(request.url).pathname]
 
-      return new Response(null, {
-        status: error instanceof ValidationError ? 400 : 500,
-      })
-    },
-  })
+    return handler
+      ? await handler(request)
+      : new Response(null, { status: 404 })
+  } catch (error) {
+    console.error(error)
+
+    return new Response(null, {
+      status: error instanceof ValidationError ? 400 : 500,
+    })
+  }
+}
+
+export const createServer = () => Bun.serve({ port: env.PORT, fetch: app })

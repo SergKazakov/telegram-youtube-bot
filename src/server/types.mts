@@ -1,7 +1,1 @@
-import { type BunRequest, type Serve } from "bun"
-
-export type RequestHandler = Serve.Handler<
-  BunRequest<string>,
-  Bun.Server<undefined>,
-  Response
->
+export type RequestHandler = (request: Request) => Promise<Response>

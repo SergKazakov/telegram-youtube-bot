@@ -1,9 +1,9 @@
 import { expect, it } from "vitest"
 
-import { client } from "../testUtils/index.mts"
+import { call } from "../testUtils/index.mts"
 
 it("should return 204", async () => {
-  const { status } = await client.head("/healthcheck")
+  const { status } = await call("/healthcheck", { method: "HEAD" })
 
   expect(status).toBe(204)
 })

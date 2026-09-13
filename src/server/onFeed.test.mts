@@ -4,7 +4,7 @@ import { expect, it } from "vitest"
 import { isShorts } from "../__mocks__/utils.mts"
 import { env } from "../env.mts"
 import { deliveryCollection, videoCollection } from "../mongodb.mts"
-import { client, createChatSubscription } from "../testUtils/index.mts"
+import { call, createChatSubscription } from "../testUtils/index.mts"
 
 const createFeed = (published: Date | null = new Date()) => `
   <feed>
@@ -20,19 +20,17 @@ const createFeed = (published: Date | null = new Date()) => `
   </feed>
 `
 
-const postPubSubHubBub = (xml: string) =>
-  client.post("/pubsubhubbub", xml, {
-    headers: { "Content-Type": "application/xml" },
-  })
+const send = (xml: string) =>
+  call("/pubsubhubbub", { method: "POST", body: xml })
 
 it("should return 400", async () => {
-  const { status } = await postPubSubHubBub("")
+  const { status } = await send("")
 
   expect(status).toBe(400)
 })
 
 it("should accept feed without published field", async () => {
-  const { status } = await postPubSubHubBub(createFeed(null))
+  const { status } = await send(createFeed(null))
 
   expect(status).toBe(204)
 
@@ -42,7 +40,7 @@ it("should accept feed without published field", async () => {
 })
 
 it("should not process videos older than 24 hours", async () => {
-  const { status } = await postPubSubHubBub(
+  const { status } = await send(
     createFeed(
       dayjs()
         .subtract(env.DAYS_TO_IGNORE_VIDEO, "d")
@@ -61,7 +59,7 @@ it("should not process videos older than 24 hours", async () => {
 it("should filter Shorts", async () => {
   isShorts.mockResolvedValueOnce(true)
 
-  const { status } = await postPubSubHubBub(createFeed())
+  const { status } = await send(createFeed())
 
   expect(status).toBe(204)
 
@@ -74,7 +72,7 @@ it("should create deliveries for subscribed chats", async () => {
   await createChatSubscription()
 
   {
-    const { status } = await postPubSubHubBub(createFeed())
+    const { status } = await send(createFeed())
 
     expect(status).toBe(204)
 
@@ -99,7 +97,7 @@ it("should create deliveries for subscribed chats", async () => {
   }
 
   {
-    const { status } = await postPubSubHubBub(createFeed())
+    const { status } = await send(createFeed())
 
     expect(status).toBe(204)
 

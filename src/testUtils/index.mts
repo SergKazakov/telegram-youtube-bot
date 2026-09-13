@@ -1,5 +1,3 @@
-import axios, { type AxiosInstance } from "axios"
-
 import {
   type ChannelSchema,
   type ChatSchema,
@@ -12,15 +10,19 @@ import {
   subscriptionCollection,
   videoCollection,
 } from "../mongodb.mts"
+import { app } from "../server/createServer.mts"
 
-export let client: AxiosInstance
+export const call = (
+  path: string,
+  { params, ...init }: RequestInit & { params?: URLSearchParams } = {},
+) => {
+  const url = new URL(path, "http://localhost")
 
-export const setupClient = (port: URL["port"]) => {
-  client = axios.create({
-    baseURL: `http://localhost:${port}`,
-    maxRedirects: 0,
-    validateStatus: () => true,
-  })
+  if (params) {
+    url.search = params.toString()
+  }
+
+  return app(new Request(url.href, init))
 }
 
 export const createChat = (attrs?: Partial<ChatSchema>) =>
