@@ -1,7 +1,11 @@
 import { type youtube_v3 as youtubeV3 } from "@googleapis/youtube"
 import { type Context, type MiddlewareFn } from "telegraf"
 
-import { channelCollection, subscriptionCollection } from "../mongodb.mts"
+import {
+  DEFAULT_CHANNEL,
+  channelCollection,
+  subscriptionCollection,
+} from "../mongodb.mts"
 import { getSubscriptions } from "../utils.mts"
 
 import { getChat } from "./requireAuth.mts"
@@ -31,21 +35,11 @@ export const subscribe: MiddlewareFn<Context> = async ctx => {
   }
 
   if (channels.length > 0) {
-    const nextAttemptAt = new Date(0)
-
     await channelCollection.bulkWrite(
       channels.map(_id => ({
         updateOne: {
           filter: { _id },
-          update: {
-            $setOnInsert: {
-              _id,
-              nextAttemptAt,
-              lastRequestedAt: null,
-              lastConfirmedAt: null,
-              lockedAt: null,
-            },
-          },
+          update: { $setOnInsert: { ...DEFAULT_CHANNEL, _id } },
           upsert: true,
         },
       })),

@@ -13,7 +13,7 @@ import {
 } from "../mongodb.mts"
 import { buildVideoUrl } from "../utils.mts"
 
-const BATCH_SIZE = 100
+const BATCH_SIZE = 500
 
 async function* getDeliveries() {
   const now = new Date()

@@ -6,9 +6,8 @@ export const {
   buildChannelUrl,
   buildFeedUrlToSubscribe,
   buildVideoUrl,
-  isShorts,
-  linkSchema,
   parseSearchParams,
+  shouldProcessEntry,
   signState,
   verifyState,
   youtubeBaseUrl,
@@ -21,3 +20,5 @@ export const getYoutubeClient = vi.fn()
 export const getSubscriptions = vi.fn()
 
 export const subscribeToChannel = vi.fn()
+
+export const getEntriesByChannelId = vi.fn()

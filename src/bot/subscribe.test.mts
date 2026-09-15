@@ -2,7 +2,11 @@ import { Context, Telegram } from "telegraf"
 import { expect, it, vi } from "vitest"
 
 import { getSubscriptions } from "../__mocks__/utils.mts"
-import { channelCollection, subscriptionCollection } from "../mongodb.mts"
+import {
+  DEFAULT_CHANNEL,
+  channelCollection,
+  subscriptionCollection,
+} from "../mongodb.mts"
 import {
   createChat,
   createChatSubscription,
@@ -80,23 +84,13 @@ it("should subscribe to channels and delete stale subscriptions", async () => {
 
   expect(ctx.reply).toHaveBeenCalledWith("Queued 2 channels for subscription")
 
+  const attrs = { ...DEFAULT_CHANNEL, nextAttemptAt: expect.any(Date) }
+
   await expect(
     channelCollection.find().sort({ _id: 1 }).toArray(),
   ).resolves.toEqual([
-    {
-      _id: "1",
-      nextAttemptAt: expect.any(Date),
-      lastRequestedAt: null,
-      lastConfirmedAt: null,
-      lockedAt: null,
-    },
-    {
-      _id: "2",
-      nextAttemptAt: expect.any(Date),
-      lastRequestedAt: null,
-      lastConfirmedAt: null,
-      lockedAt: null,
-    },
+    { ...attrs, _id: "1" },
+    { ...attrs, _id: "2" },
   ])
 
   await expect(

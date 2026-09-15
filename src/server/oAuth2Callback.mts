@@ -2,17 +2,14 @@ import { ValidationError } from "yup"
 
 import { bot } from "../bot/index.mts"
 import { chatCollection } from "../mongodb.mts"
+import { schemaToHandleOAuth2Callback } from "../schemas.mts"
 import { getOAuth2Client, parseSearchParams, verifyState } from "../utils.mts"
 
 import { type RequestHandler } from "./types.mts"
 
 export const oAuth2Callback: RequestHandler = async request => {
   const { code, state } = await parseSearchParams(
-    yup =>
-      yup.object({
-        code: yup.string().trim().required(),
-        state: yup.string().trim().required(),
-      }),
+    schemaToHandleOAuth2Callback,
     request,
   )
 
