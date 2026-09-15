@@ -3,6 +3,7 @@ import { ValidationError } from "yup"
 
 import { env } from "../env.mts"
 import { channelCollection } from "../mongodb.mts"
+import { schemaToConfirmSubscription } from "../schemas.mts"
 import { parseSearchParams } from "../utils.mts"
 
 import { type RequestHandler } from "./types.mts"
@@ -12,15 +13,7 @@ export const confirmSubscription: RequestHandler = async request => {
     "hub.challenge": challenge,
     "hub.topic": topic,
     "hub.mode": mode,
-  } = await parseSearchParams(
-    yup =>
-      yup.object({
-        "hub.challenge": yup.string().trim().required(),
-        "hub.topic": yup.string().url().required(),
-        "hub.mode": yup.string().oneOf(["subscribe", "unsubscribe"]).required(),
-      }),
-    request,
-  )
+  } = await parseSearchParams(schemaToConfirmSubscription, request)
 
   const channelId = new URL(topic).searchParams.get("channel_id")
 

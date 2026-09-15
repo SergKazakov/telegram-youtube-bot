@@ -1,8 +1,10 @@
 import axios, { type AxiosInstance } from "axios"
+import { expect } from "vitest"
 
 import {
   type ChannelSchema,
   type ChatSchema,
+  DEFAULT_CHANNEL,
   type DeliverySchema,
   type SubscriptionSchema,
   type VideoSchema,
@@ -32,11 +34,8 @@ export const createChat = (attrs?: Partial<ChatSchema>) =>
 
 export const createChannel = (attrs?: Partial<ChannelSchema>) =>
   channelCollection.insertOne({
+    ...DEFAULT_CHANNEL,
     _id: "channelId",
-    nextAttemptAt: new Date(0),
-    lastRequestedAt: null,
-    lastConfirmedAt: null,
-    lockedAt: null,
     ...attrs,
   })
 
@@ -69,7 +68,14 @@ export const createDelivery = (attrs?: Partial<DeliverySchema>) =>
     _id: { chatId: "chatId", videoId: "videoId" },
     createdAt: new Date(),
     nextAttemptAt: new Date(),
+    lockedAt: null,
     status: "pending",
     attempts: 0,
     ...attrs,
   })
+
+export const expectCounts = async (videos: number, deliveries: number) => {
+  await expect(videoCollection.countDocuments()).resolves.toBe(videos)
+
+  await expect(deliveryCollection.countDocuments()).resolves.toBe(deliveries)
+}

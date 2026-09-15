@@ -11,24 +11,24 @@
     "semi": false
   },
   "dependencies": {
-    "@googleapis/youtube": "^35.0.0",
+    "@googleapis/youtube": "^39.0.0",
     "axios": "^1.20.0",
     "dayjs": "^1.11.23",
     "envalid": "^8.2.0",
-    "gaxios": "^8.0.0",
+    "gaxios": "^8.1.0",
     "mongodb": "^7.6.0",
     "telegraf": "^4.16.3",
     "yup": "^1.7.1"
   },
   "devDependencies": {
-    "@evilmartians/lefthook-installer": "^2.1.12",
-    "@skazakov/eslint-config": "https://gist.github.com/SergKazakov/23524f9406ff30a6924ca01462caa50a.git#91d67a4307a382d7a5896cb7210a10234c48941b",
-    "@types/bun": "^1.4.0",
-    "eslint": "~10.9.1",
-    "prettier": "^3.9.6",
+    "@evilmartians/lefthook-installer": "^2.1.14",
+    "@skazakov/eslint-config": "https://gist.github.com/SergKazakov/23524f9406ff30a6924ca01462caa50a.git#31b5408e882e105d84d2158290bf2aad94d9c020",
+    "@types/bun": "^1.4.2",
+    "eslint": "~10.11.0",
+    "prettier": "^3.9.8",
     "testcontainers": "^12.1.0",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.1"
   },
   "trustedDependencies": [
     "@evilmartians/lefthook-installer"

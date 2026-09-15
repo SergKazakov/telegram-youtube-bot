@@ -4,8 +4,7 @@ import { type Context, Markup, type MiddlewareFn } from "telegraf"
 import { type AuthenticatedChatSchema, chatCollection } from "../mongodb.mts"
 import { getOAuth2Client, getYoutubeClient, signState } from "../utils.mts"
 
-export const getChat = (ctx: Context) =>
-  ctx.state.chat as AuthenticatedChatSchema
+export const getChat = (ctx: Context): AuthenticatedChatSchema => ctx.state.chat
 
 const replyWithAuth = (ctx: Context, chatId: string) =>
   ctx.reply(

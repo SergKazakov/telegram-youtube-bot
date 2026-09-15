@@ -18,6 +18,19 @@ export type ChannelSchema = {
   lastRequestedAt: Date | null
   lastConfirmedAt: Date | null
   lockedAt: Date | null
+  lastPolledVideoId: string | null
+  lastPolledAt: Date | null
+  pollLockedAt: Date | null
+}
+
+export const DEFAULT_CHANNEL: Omit<ChannelSchema, "_id"> = {
+  nextAttemptAt: new Date(0),
+  lastRequestedAt: null,
+  lastConfirmedAt: null,
+  lockedAt: null,
+  lastPolledVideoId: null,
+  lastPolledAt: null,
+  pollLockedAt: null,
 }
 
 export const channelCollection = db.collection<ChannelSchema>("channels")
@@ -40,7 +53,8 @@ export type DeliverySchema = {
   _id: { chatId: string; videoId: string }
   createdAt: Date
   nextAttemptAt: Date
-  status: "pending" | "processing" | "delivered" | "failed"
+  lockedAt: Date | null
+  status: "pending" | "delivered" | "failed"
   attempts: number
 }
 
@@ -49,7 +63,13 @@ export const deliveryCollection = db.collection<DeliverySchema>("deliveries")
 export const setupDatabase = async () => {
   await channelCollection.createIndex({ nextAttemptAt: 1, lockedAt: 1 })
 
-  await deliveryCollection.createIndex({ status: 1, nextAttemptAt: 1 })
+  await channelCollection.createIndex({ lastPolledAt: 1, pollLockedAt: 1 })
+
+  await deliveryCollection.createIndex({
+    status: 1,
+    nextAttemptAt: 1,
+    lockedAt: 1,
+  })
 }
 
 export const cleanup = async () => {
@@ -60,4 +80,32 @@ export const cleanup = async () => {
     subscriptionCollection.deleteMany(),
     videoCollection.deleteMany(),
   ])
+}
+
+export const createDeliveries = async (
+  channelId: string,
+  videoIds: string[],
+) => {
+  const cursor = subscriptionCollection.find({ "_id.channelId": channelId })
+
+  const deliveries: DeliverySchema[] = []
+
+  const createdAt = new Date()
+
+  for await (const it of cursor) {
+    for (const videoId of videoIds) {
+      deliveries.push({
+        _id: { chatId: it._id.chatId, videoId },
+        createdAt,
+        nextAttemptAt: createdAt,
+        lockedAt: null,
+        status: "pending" as const,
+        attempts: 0,
+      })
+    }
+  }
+
+  if (deliveries.length > 0) {
+    await deliveryCollection.insertMany(deliveries)
+  }
 }
