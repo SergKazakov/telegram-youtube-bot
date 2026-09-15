@@ -2,8 +2,17 @@ import dayjs from "dayjs"
 import { expect, it } from "vitest"
 
 import { env } from "../env.mts"
-import { deliveryCollection, videoCollection } from "../mongodb.mts"
-import { client, createChatSubscription } from "../testUtils/index.mts"
+import {
+  channelCollection,
+  deliveryCollection,
+  videoCollection,
+} from "../mongodb.mts"
+import {
+  client,
+  createChannel,
+  createChatSubscription,
+  expectCounts,
+} from "../testUtils/index.mts"
 import { youtubeBaseUrl } from "../utils.mts"
 
 type CreateFeedParams = { published?: Date | null; links?: string[] }
@@ -57,6 +66,8 @@ it("should skip entries", async () => {
 })
 
 it("should create deliveries for subscribed chats", async () => {
+  await createChannel()
+
   await createChatSubscription()
 
   {
@@ -82,6 +93,10 @@ it("should create deliveries for subscribed chats", async () => {
       status: "pending",
       attempts: 0,
     })
+
+    await expect(
+      channelCollection.findOne({ _id: "channelId" }),
+    ).resolves.toMatchObject({ lastPolledVideoId: "videoId" })
   }
 
   {
@@ -89,8 +104,6 @@ it("should create deliveries for subscribed chats", async () => {
 
     expect(status).toBe(204)
 
-    await expect(videoCollection.countDocuments()).resolves.toBe(1)
-
-    await expect(deliveryCollection.countDocuments()).resolves.toBe(1)
+    await expectCounts(1, 1)
   }
 })

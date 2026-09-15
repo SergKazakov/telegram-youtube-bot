@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@evilmartians/lefthook-installer": "^2.1.12",
-    "@skazakov/eslint-config": "https://gist.github.com/SergKazakov/23524f9406ff30a6924ca01462caa50a.git#91d67a4307a382d7a5896cb7210a10234c48941b",
+    "@skazakov/eslint-config": "https://gist.github.com/SergKazakov/23524f9406ff30a6924ca01462caa50a.git#31b5408e882e105d84d2158290bf2aad94d9c020",
     "@types/bun": "^1.4.0",
     "eslint": "~10.9.1",
     "prettier": "^3.9.6",
