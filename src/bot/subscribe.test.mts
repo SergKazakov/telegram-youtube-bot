@@ -1,7 +1,7 @@
 import { Context, Telegram } from "telegraf"
 import { expect, it, vi } from "vitest"
 
-import { getSubscriptions } from "../__mocks__/utils.mts"
+import { getYoutubeClient } from "../lib/__mocks__/youtube.mts"
 import {
   DEFAULT_CHANNEL,
   channelCollection,
@@ -14,6 +14,21 @@ import {
 } from "../testUtils/index.mts"
 
 import { subscribe } from "./subscribe.mts"
+
+const setYoutubeSubscriptions = (channelIds: string[]) =>
+  getYoutubeClient.mockReturnValue({
+    subscriptions: {
+      list: vi
+        .fn()
+        .mockResolvedValue({
+          data: {
+            items: channelIds.map(channelId => ({
+              snippet: { resourceId: { channelId }, title: "foo" },
+            })),
+          },
+        }),
+    },
+  })
 
 const createContext = () => {
   const ctx = new Context<Context["update"]>(
@@ -50,7 +65,7 @@ const createContext = () => {
 it("should delete stale subscriptions when youtube subscriptions are empty", async () => {
   await createChatSubscription({ _id: "0" }, { channelId: "0", chatId: "0" })
 
-  getSubscriptions.mockResolvedValue({ items: [], nextPageToken: null })
+  setYoutubeSubscriptions([])
 
   const ctx = createContext()
 
@@ -70,13 +85,7 @@ it("should subscribe to channels and delete stale subscriptions", async () => {
     { channelId: "0", chatId: "1" },
   ])
 
-  getSubscriptions.mockResolvedValue({
-    items: [
-      { channelId: "1", title: "foo" },
-      { channelId: "2", title: "foo" },
-    ],
-    nextPageToken: null,
-  })
+  setYoutubeSubscriptions(["1", "2"])
 
   const ctx = createContext()
 

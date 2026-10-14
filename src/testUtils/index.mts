@@ -61,6 +61,7 @@ export const createVideo = (attrs?: Partial<VideoSchema>) =>
     publishedAt: new Date(),
     authorName: "name",
     title: "title",
+    thumbnail: null,
     ...attrs,
   })
 
@@ -97,4 +98,14 @@ export const expectChannel = async (
   }
 
   expect(channel).toMatchObject(attrs)
+}
+
+export const expectDelivery = async (
+  attrs: Omit<Partial<DeliverySchema>, "_id">,
+) => {
+  await expect(
+    deliveryCollection.findOne({
+      _id: { chatId: "chatId", videoId: "videoId" },
+    }),
+  ).resolves.toMatchObject(attrs)
 }

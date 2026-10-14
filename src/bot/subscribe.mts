@@ -1,36 +1,22 @@
-import { type youtube_v3 as youtubeV3 } from "@googleapis/youtube"
 import { type Context, type MiddlewareFn } from "telegraf"
 
+import { getAllSubscriptions, getYoutubeClient } from "../lib/youtube.mts"
 import {
   DEFAULT_CHANNEL,
   channelCollection,
   subscriptionCollection,
 } from "../mongodb.mts"
-import { getSubscriptions } from "../utils.mts"
 
 import { getChat } from "./requireAuth.mts"
-
-async function* getAllSubscriptions(refreshToken: string) {
-  let pageToken: youtubeV3.Schema$SubscriptionListResponse["nextPageToken"]
-
-  do {
-    const { items, nextPageToken } = await getSubscriptions({
-      ...(pageToken && { pageToken }),
-      refreshToken,
-    })
-
-    yield* items
-
-    pageToken = nextPageToken
-  } while (pageToken)
-}
 
 export const subscribe: MiddlewareFn<Context> = async ctx => {
   const chat = getChat(ctx)
 
   const channels: string[] = []
 
-  for await (const it of getAllSubscriptions(chat.refreshToken)) {
+  const subscriptions = getAllSubscriptions(getYoutubeClient(chat.refreshToken))
+
+  for await (const it of subscriptions) {
     channels.push(it.channelId)
   }
 

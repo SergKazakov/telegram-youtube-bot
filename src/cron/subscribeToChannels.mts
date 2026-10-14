@@ -1,21 +1,8 @@
-import axios from "axios"
 import dayjs from "dayjs"
 
 import { env } from "../env.mts"
+import { subscribeToChannel } from "../lib/hub.mts"
 import { channelCollection, claimLocked } from "../mongodb.mts"
-import { buildFeedUrlToSubscribe } from "../utils.mts"
-
-const subscribeToChannel = (id: string) =>
-  axios.post(
-    "https://pubsubhubbub.appspot.com",
-    new URLSearchParams([
-      ["hub.callback", `${env.PUBLIC_URL}/pubsubhubbub`],
-      ["hub.mode", "subscribe"],
-      ["hub.topic", buildFeedUrlToSubscribe(id)],
-      ["hub.verify", "async"],
-    ]),
-    { timeout: env.HUB_TIMEOUT },
-  )
 
 export const subscribeToChannels = async (
   subscribe: typeof subscribeToChannel = subscribeToChannel,

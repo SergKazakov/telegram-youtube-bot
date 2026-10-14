@@ -1,8 +1,10 @@
-import { GaxiosError } from "gaxios"
+import dayjs from "dayjs"
 import { type Context, Markup, type MiddlewareFn } from "telegraf"
 
+import { env } from "../env.mts"
+import { buildAuthUrl, getOAuth2Client, signState } from "../lib/oauth.mts"
+import { getYoutubeClient, isRefreshTokenValid } from "../lib/youtube.mts"
 import { type AuthenticatedChatSchema, chatCollection } from "../mongodb.mts"
-import { getOAuth2Client, getYoutubeClient, signState } from "../utils.mts"
 
 export const getChat = (ctx: Context): AuthenticatedChatSchema => ctx.state.chat
 
@@ -12,32 +14,35 @@ const replyWithAuth = (ctx: Context, chatId: string) =>
     Markup.inlineKeyboard([
       Markup.button.url(
         "Google",
-        getOAuth2Client().generateAuthUrl({
-          access_type: "offline",
-          prompt: "consent",
-          scope: ["https://www.googleapis.com/auth/youtube"],
-          state: signState(chatId),
-        }),
+        buildAuthUrl(getOAuth2Client(), signState(chatId)),
       ),
     ]),
   )
 
-const isTokenValid = async (refreshToken: string) => {
-  try {
-    await getYoutubeClient(refreshToken).channels.list({
-      mine: true,
-      maxResults: 1,
-      part: ["id"],
-    })
+const tokenValidityCache = new Map<string, Date>()
 
+const isTokenValid = async (refreshToken: string) => {
+  const cachedUntil = tokenValidityCache.get(refreshToken)
+
+  if (cachedUntil && dayjs().isBefore(cachedUntil)) {
     return true
-  } catch (error) {
-    if (
-      error instanceof GaxiosError
-      && error.response?.data?.error === "invalid_grant"
-    ) {
-      return false
+  }
+
+  try {
+    const valid = await isRefreshTokenValid(getYoutubeClient(refreshToken))
+
+    if (valid) {
+      tokenValidityCache.set(
+        refreshToken,
+        dayjs().add(env.MINUTES_TO_CACHE_TOKEN, "m").toDate(),
+      )
+    } else {
+      tokenValidityCache.delete(refreshToken)
     }
+
+    return valid
+  } catch (error) {
+    tokenValidityCache.delete(refreshToken)
 
     throw error
   }
