@@ -1,9 +1,14 @@
 import { ValidationError } from "yup"
 
 import { bot } from "../bot/index.mts"
+import { parseSearchParams } from "../lib/http.mts"
+import {
+  exchangeCodeForRefreshToken,
+  getOAuth2Client,
+  verifyState,
+} from "../lib/oauth.mts"
 import { chatCollection } from "../mongodb.mts"
 import { schemaToHandleOAuth2Callback } from "../schemas.mts"
-import { getOAuth2Client, parseSearchParams, verifyState } from "../utils.mts"
 
 import { type RequestHandler } from "./types.mts"
 
@@ -19,11 +24,18 @@ export const oAuth2Callback: RequestHandler = async request => {
     throw new ValidationError("Invalid state")
   }
 
-  const { tokens } = await getOAuth2Client().getToken(code)
+  const refreshToken = await exchangeCodeForRefreshToken(
+    getOAuth2Client(),
+    code,
+  )
+
+  if (!refreshToken) {
+    throw new ValidationError("Missing refresh token")
+  }
 
   await chatCollection.updateOne(
     { _id: chatId },
-    { $set: { refreshToken: tokens.refresh_token as string } },
+    { $set: { refreshToken } },
     { upsert: true },
   )
 

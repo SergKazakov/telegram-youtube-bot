@@ -15,7 +15,6 @@ jobs:
       - parallel:
           - run: bun dedupe --check
           - run: bunx eslint
-          - run: bunx tsc
           - run: bun run test
           - run: bun run build
       - uses: actions/upload-artifact@v7

@@ -1,9 +1,8 @@
 import { expect, it, vi } from "vitest"
 
-import { getOAuth2Client } from "../__mocks__/utils.mts"
+import { getOAuth2Client, signState } from "../lib/__mocks__/oauth.mts"
 import { chatCollection } from "../mongodb.mts"
 import { client } from "../testUtils/index.mts"
-import { signState } from "../utils.mts"
 
 const send = (params: Record<string, string>) =>
   client("/oauth2callback", { params })

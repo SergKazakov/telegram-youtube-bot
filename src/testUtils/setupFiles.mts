@@ -8,7 +8,9 @@ Bun.env.MONGODB_URL = `${Bun.env.MONGODB_CONNECTION_STRING}/${Bun.env.VITEST_POO
 
 vi.mock("../bot/index.mts")
 
-vi.mock("../utils.mts")
+vi.mock("../lib/oauth.mts")
+
+vi.mock("../lib/youtube.mts")
 
 let cleanup: () => Promise<void>
 

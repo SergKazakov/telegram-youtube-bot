@@ -1,7 +1,12 @@
 import dayjs from "dayjs"
 import { expect, it, vi } from "vitest"
 
-import { youtubeBaseUrl } from "../__mocks__/utils.mts"
+import {
+  buildThumbnailUrl,
+  getVideoThumbnail,
+  youtubeBaseUrl,
+} from "../lib/__mocks__/youtube.mts"
+import { videoCollection } from "../mongodb.mts"
 import {
   createChannel,
   createSubscriptions,
@@ -125,6 +130,18 @@ it("should insert a video and create deliveries for the channel", async () => {
   const poll = await pollAndExpect({ videos: 1, deliveries: 1 })
 
   await poll()
+})
+
+it("should insert the video thumbnail", async () => {
+  const thumbnail = buildThumbnailUrl("videoId", "maxresdefault")
+
+  getVideoThumbnail.mockResolvedValueOnce(thumbnail)
+
+  await pollAndExpect({ videos: 1 })
+
+  await expect(
+    videoCollection.findOne({ _id: "videoId" }),
+  ).resolves.toMatchObject({ thumbnail })
 })
 
 it("should keep pollLockedAt on error", async () => {

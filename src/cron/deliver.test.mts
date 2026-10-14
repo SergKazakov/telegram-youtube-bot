@@ -4,7 +4,6 @@ import { beforeEach, expect, it, vi } from "vitest"
 import { bot } from "../bot/__mocks__/index.mts"
 import { env } from "../env.mts"
 import {
-  type DeliverySchema,
   chatCollection,
   deliveryCollection,
   subscriptionCollection,
@@ -13,17 +12,10 @@ import {
   createChatSubscription,
   createDelivery,
   createVideo,
+  expectDelivery,
 } from "../testUtils/index.mts"
 
 import { deliver } from "./deliver.mts"
-
-const expectDelivery = async (attrs: Omit<Partial<DeliverySchema>, "_id">) => {
-  await expect(
-    deliveryCollection.findOne({
-      _id: { chatId: "chatId", videoId: "videoId" },
-    }),
-  ).resolves.toMatchObject(attrs)
-}
 
 beforeEach(() => {
   vi.useFakeTimers().setSystemTime(new Date("2026-01-01T00:00:00.000Z"))
@@ -76,22 +68,35 @@ it("should keep a delivery pending after a failed attempt", async () => {
   })
 })
 
-it("should respect Telegram's retry_after", async () => {
+it("should not send the rest after a 429", async () => {
   await createVideo()
 
   await createDelivery()
 
+  await createDelivery({ _id: { chatId: "chatId2", videoId: "videoId" } })
+
   bot.telegram.sendMessage.mockRejectedValueOnce(
     new TelegramError({
-      description: "Too Many Requests: retry later",
       error_code: 429,
+      description: "Too Many Requests: retry later",
       parameters: { retry_after: 90 },
     }),
   )
 
   await deliver()
 
-  await expectDelivery({ nextAttemptAt: new Date("2026-01-01T00:01:30.000Z") })
+  expect(bot.telegram.sendMessage).toHaveBeenCalledTimes(1)
+
+  await expect(deliveryCollection.find().toArray()).resolves.toEqual(
+    Array.from({ length: 2 }, () => ({
+      _id: expect.any(Object),
+      createdAt: expect.any(Date),
+      nextAttemptAt: new Date("2026-01-01T00:01:30.000Z"),
+      lockedAt: null,
+      status: "pending",
+      attempts: 0,
+    })),
+  )
 })
 
 it("should fail and delete subscriptions when the bot is blocked", async () => {
@@ -121,7 +126,21 @@ it("should fail and delete subscriptions when the bot is blocked", async () => {
   await expectDelivery({ lockedAt: null, status: "failed" })
 })
 
-it("should deliver", async () => {
+it("should send a photo when the video has a thumbnail", async () => {
+  await createVideo({ thumbnail: "foo" })
+
+  await createDelivery()
+
+  await deliver()
+
+  await expectDelivery({ lockedAt: null, status: "delivered" })
+
+  expect(bot.telegram.sendPhoto).toHaveBeenCalledTimes(1)
+
+  expect(bot.telegram.sendMessage).not.toHaveBeenCalled()
+})
+
+it("should send a message when the video has no thumbnail", async () => {
   await createVideo()
 
   await createDelivery()
@@ -129,4 +148,8 @@ it("should deliver", async () => {
   await deliver()
 
   await expectDelivery({ lockedAt: null, status: "delivered" })
+
+  expect(bot.telegram.sendPhoto).not.toHaveBeenCalled()
+
+  expect(bot.telegram.sendMessage).toHaveBeenCalledTimes(1)
 })

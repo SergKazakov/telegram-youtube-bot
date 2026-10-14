@@ -1,4 +1,6 @@
 import { processChannel } from "../cron/pollChannels.mts"
+import { safeEqual } from "../lib/crypto.mts"
+import { signHub } from "../lib/hub.mts"
 import { channelCollection } from "../mongodb.mts"
 import { schemaToHandleNotification } from "../schemas.mts"
 
@@ -18,6 +20,12 @@ const getEntry = async (input: string) => {
 
 export const onFeed: RequestHandler = async request => {
   const rawBody = await request.text()
+
+  const signature = request.headers.get("x-hub-signature")
+
+  if (!(signature && safeEqual(signHub(rawBody), signature))) {
+    return new Response(null, { status: 403 })
+  }
 
   console.log(rawBody)
 

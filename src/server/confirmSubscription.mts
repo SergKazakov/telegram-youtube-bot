@@ -2,9 +2,9 @@ import dayjs from "dayjs"
 import { ValidationError } from "yup"
 
 import { env } from "../env.mts"
+import { parseSearchParams } from "../lib/http.mts"
 import { channelCollection } from "../mongodb.mts"
 import { schemaToConfirmSubscription } from "../schemas.mts"
-import { parseSearchParams } from "../utils.mts"
 
 import { type RequestHandler } from "./types.mts"
 
