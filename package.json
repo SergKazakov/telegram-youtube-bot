@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "bun build src/index.mts --compile --outfile=cli",
+    "build": "bun build src/index.mts --check --compile --outfile=cli",
     "dev": "bun --watch src/index.mts",
     "test": "TESTCONTAINERS_RYUK_DISABLED=true bun run --bun vitest run"
   },
@@ -15,7 +15,6 @@
     "axios": "^1.20.0",
     "dayjs": "^1.11.23",
     "envalid": "^8.2.0",
-    "gaxios": "^8.1.0",
     "mongodb": "^7.7.0",
     "telegraf": "^4.16.3",
     "yup": "^1.7.1"

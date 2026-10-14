@@ -1,14 +1,15 @@
 import { type Context, Markup, type MiddlewareFn } from "telegraf"
 
 import {
+  buildChannelUrl,
+  deleteSubscription,
+  getSubscriptions,
+  getYoutubeClient,
+} from "../lib/youtube.mts"
+import {
   type AuthenticatedChatSchema,
   subscriptionCollection,
 } from "../mongodb.mts"
-import {
-  buildChannelUrl,
-  getSubscriptions,
-  getYoutubeClient,
-} from "../utils.mts"
 
 import { getChat } from "./requireAuth.mts"
 
@@ -21,10 +22,10 @@ const buildChannelList = async ({
   pageToken?: string
   fn: Context["reply"] | Context["editMessageText"]
 }) => {
-  const { items, nextPageToken } = await getSubscriptions({
-    refreshToken: chat.refreshToken,
-    pageToken,
-  })
+  const { items, nextPageToken } = await getSubscriptions(
+    getYoutubeClient(chat.refreshToken),
+    { pageToken },
+  )
 
   if (items.length === 0) {
     await fn("No subscriptions")
@@ -68,21 +69,7 @@ export const unsubscribeFromChannel: ActionHandler = async ctx => {
 
   const channelId = ctx.match[1]
 
-  const youtubeClient = getYoutubeClient(chat.refreshToken)
-
-  const {
-    data: { items },
-  } = await youtubeClient.subscriptions.list({
-    forChannelId: channelId,
-    mine: true,
-    part: ["id"],
-  })
-
-  const id = items?.[0]?.id
-
-  if (id) {
-    await youtubeClient.subscriptions.delete({ id })
-  }
+  await deleteSubscription(getYoutubeClient(chat.refreshToken), channelId)
 
   await subscriptionCollection.deleteOne({
     _id: { channelId, chatId: chat._id },

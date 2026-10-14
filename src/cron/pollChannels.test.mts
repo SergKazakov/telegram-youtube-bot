@@ -1,7 +1,7 @@
 import dayjs from "dayjs"
 import { expect, it, vi } from "vitest"
 
-import { youtubeBaseUrl } from "../__mocks__/utils.mts"
+import { youtubeBaseUrl } from "../lib/__mocks__/youtube.mts"
 import {
   createChannel,
   createSubscriptions,

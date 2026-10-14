@@ -95,19 +95,27 @@ export async function* claimLocked<T extends Document>({
   lockField,
   filter,
   sort,
+  limit = 500,
   now = new Date(),
 }: {
   collection: Collection<T>
   lockField: string
   filter?: Filter<T>
   sort?: Sort
+  limit?: number
   now?: Date
 }) {
-  const lockThreshold = dayjs()
+  const lockThreshold = dayjs(now)
     .subtract(env.MINUTES_TO_STALE_LOCK, "m")
     .toDate()
 
+  let claimed = 0
+
   for (;;) {
+    if (claimed >= limit) {
+      break
+    }
+
     const document = await collection.findOneAndUpdate(
       {
         ...filter,
@@ -120,6 +128,8 @@ export async function* claimLocked<T extends Document>({
     if (!document) {
       break
     }
+
+    ++claimed
 
     yield document
   }

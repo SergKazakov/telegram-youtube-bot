@@ -1,5 +1,6 @@
 import { expect, it } from "vitest"
 
+import { signHub } from "../lib/hub.mts"
 import { deliveryCollection, videoCollection } from "../mongodb.mts"
 import {
   client,
@@ -27,7 +28,25 @@ const createFeed = ({
   </feed>
 `
 
-const send = (xml?: string) => client.post("/pubsubhubbub", xml)
+const send = (xml = "", signature = signHub(xml)) =>
+  client.post("/pubsubhubbub", xml, {
+    headers: {
+      ...(signature && { "X-Hub-Signature": signature }),
+      "Content-Type": "application/xml",
+    },
+  })
+
+it("should return 403 on an invalid signature", async () => {
+  const { status } = await send(createFeed(), "foo")
+
+  expect(status).toBe(403)
+})
+
+it("should skip the signature check when the header is missing", async () => {
+  const { status } = await send(createFeed(), "")
+
+  expect(status).toBe(204)
+})
 
 it("should skip entries", async () => {
   for (const arg of [undefined, "", createFeed()]) {

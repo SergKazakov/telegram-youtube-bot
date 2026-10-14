@@ -8,8 +8,11 @@ export const env = cleanEnv(Bun.env, {
   GOOGLE_CLIENT_ID: str({ testDefault: "" }),
   GOOGLE_CLIENT_SECRET: str({ testDefault: "" }),
   HUB_TIMEOUT: num({ default: 30_000 }),
+  HUB_SECRET: str({ testDefault: "foo" }),
   MAX_ATTEMPTS_TO_DELIVER: num({ default: 5 }),
+  MINUTES_TO_CACHE_TOKEN: num({ default: 5 }),
   MINUTES_TO_CONFIRM_SUBSCRIPTION: num({ default: 30 }),
+  MINUTES_TO_EXPIRE_STATE: num({ default: 10 }),
   MINUTES_TO_RETRY_SUBSCRIPTION: num({ default: 30 }),
   MINUTES_TO_STALE_LOCK: num({ default: 5 }),
   MONGODB_URL: url({

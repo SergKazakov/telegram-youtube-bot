@@ -1,7 +1,7 @@
 import { expect, it } from "vitest"
 
+import { buildFeedUrlToSubscribe } from "../lib/__mocks__/youtube.mts"
 import { client, createChannel, expectChannel } from "../testUtils/index.mts"
-import { buildFeedUrlToSubscribe } from "../utils.mts"
 
 const send = async (params: Record<string, string>) => {
   const response = await client("/pubsubhubbub", { params })

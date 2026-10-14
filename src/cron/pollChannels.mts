@@ -1,8 +1,8 @@
-import axios from "axios"
 import dayjs from "dayjs"
 import { MongoServerError } from "mongodb"
 
 import { env } from "../env.mts"
+import { getEntries } from "../lib/youtube.mts"
 import {
   type ChannelSchema,
   type DeliverySchema,
@@ -13,21 +13,6 @@ import {
   videoCollection,
 } from "../mongodb.mts"
 import { type FeedEntry, normalizeLinks } from "../schemas.mts"
-import { buildFeedUrlToPoll } from "../utils.mts"
-
-export const getEntries = async (channelId: string) => {
-  const { data } = await axios<string>(buildFeedUrlToPoll(channelId), {
-    timeout: env.FEED_TIMEOUT,
-  })
-
-  const {
-    feed: { entry },
-  } = Bun.XML.parse(data.trim()) as unknown as {
-    feed: { entry: FeedEntry | FeedEntry[] }
-  }
-
-  return Array.isArray(entry) ? entry : [entry]
-}
 
 const shouldProcessEntry = async (entry: FeedEntry) => {
   if (

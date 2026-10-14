@@ -3,6 +3,7 @@ import { TelegramError } from "telegraf"
 
 import { bot } from "../bot/index.mts"
 import { env } from "../env.mts"
+import { buildVideoUrl } from "../lib/youtube.mts"
 import {
   type DeliverySchema,
   type VideoSchema,
@@ -12,7 +13,6 @@ import {
   subscriptionCollection,
   videoCollection,
 } from "../mongodb.mts"
-import { buildVideoUrl } from "../utils.mts"
 
 const updateOne = (
   _id: DeliverySchema["_id"],
