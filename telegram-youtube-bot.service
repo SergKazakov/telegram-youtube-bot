@@ -1,0 +1,12 @@
+[Unit]
+Description=Telegram YouTube Bot
+
+[Service]
+WorkingDirectory=/root/telegram-youtube-bot
+ExecStart=/root/telegram-youtube-bot/cli
+Restart=always
+RestartSec=5
+EnvironmentFile=/root/telegram-youtube-bot/.env
+
+[Install]
+WantedBy=multi-user.target

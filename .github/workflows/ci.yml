@@ -22,7 +22,7 @@ jobs:
           name: artifacts
           path: |
             cli
-            oxfile.toml
+            telegram-youtube-bot.service
 
   deploy:
     needs: ci
@@ -31,12 +31,20 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: artifacts
+      - uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            mkdir -p ${{ secrets.APP_DIR }}
       - uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "cli,oxfile.toml"
+          source: "cli,telegram-youtube-bot.service"
           target: ${{ secrets.APP_DIR }}
       - uses: appleboy/ssh-action@v1
         with:
@@ -48,6 +56,7 @@ jobs:
             cd ${{ secrets.APP_DIR }}
             echo '${{ secrets.ENV_FILE }}' > .env
             chmod +x cli
-            oxmgr validate ./oxfile.toml
-            oxmgr apply ./oxfile.toml
-            oxmgr restart telegram-youtube-bot
+            cp telegram-youtube-bot.service /etc/systemd/system/
+            systemctl daemon-reload
+            systemctl enable telegram-youtube-bot
+            systemctl restart telegram-youtube-bot

@@ -1,8 +1,0 @@
-version = 1
-
-[[apps]]
-command = "./cli"
-cwd = "/root/telegram-youtube-bot"
-health_cmd = "curl -fsS --head http://localhost:4444/healthcheck"
-name = "telegram-youtube-bot"
-wait_ready = true
