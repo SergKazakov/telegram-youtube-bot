@@ -9,6 +9,7 @@ import {
 } from "mongodb"
 
 import { env } from "./env.mts"
+import { callbackUrl } from "./lib/hub.mts"
 
 export const mongoClient = await MongoClient.connect(env.MONGODB_URL)
 
@@ -22,6 +23,7 @@ export const chatCollection = db.collection<ChatSchema>("chats")
 
 export type ChannelSchema = {
   _id: string
+  callbackUrl: string
   nextAttemptAt: Date
   lastRequestedAt: Date | null
   lastConfirmedAt: Date | null
@@ -32,6 +34,7 @@ export type ChannelSchema = {
 }
 
 export const DEFAULT_CHANNEL: Omit<ChannelSchema, "_id"> = {
+  callbackUrl: `${env.PUBLIC_URL}/pubsubhubbub`,
   nextAttemptAt: new Date(0),
   lastRequestedAt: null,
   lastConfirmedAt: null,
@@ -70,15 +73,19 @@ export type DeliverySchema = {
 export const deliveryCollection = db.collection<DeliverySchema>("deliveries")
 
 export const setupDatabase = async () => {
-  await channelCollection.createIndex({ nextAttemptAt: 1, lockedAt: 1 })
+  await channelCollection.createIndexes([
+    { key: { nextAttemptAt: 1, lockedAt: 1 } },
+    { key: { lastPolledAt: 1, pollLockedAt: 1 } },
+  ])
 
-  await channelCollection.createIndex({ lastPolledAt: 1, pollLockedAt: 1 })
+  await deliveryCollection.createIndexes([
+    { key: { status: 1, nextAttemptAt: 1, lockedAt: 1 } },
+  ])
 
-  await deliveryCollection.createIndex({
-    status: 1,
-    nextAttemptAt: 1,
-    lockedAt: 1,
-  })
+  await channelCollection.updateMany(
+    { callbackUrl: { $ne: callbackUrl } },
+    { $set: { callbackUrl, nextAttemptAt: new Date(0) } },
+  )
 }
 
 export const cleanup = async () => {

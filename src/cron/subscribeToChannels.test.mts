@@ -1,6 +1,7 @@
 import dayjs from "dayjs"
 import { expect, it, vi } from "vitest"
 
+import { callbackUrl } from "../lib/hub.mts"
 import { createChannel, expectChannel } from "../testUtils/index.mts"
 
 import { subscribeToChannels } from "./subscribeToChannels.mts"
@@ -58,7 +59,7 @@ it("should subscribe to new channels", async () => {
   expect(subscribeToChannel).toHaveBeenCalledWith("channelId")
 
   await expectChannel(
-    { lastRequestedAt: expect.any(Date), lockedAt: null },
+    { callbackUrl, lastRequestedAt: expect.any(Date), lockedAt: null },
     { $expr: { $gt: ["$nextAttemptAt", "$$NOW"] } },
   )
 })

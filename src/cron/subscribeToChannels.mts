@@ -1,7 +1,7 @@
 import dayjs from "dayjs"
 
 import { env } from "../env.mts"
-import { subscribeToChannel } from "../lib/hub.mts"
+import { callbackUrl, subscribeToChannel } from "../lib/hub.mts"
 import { channelCollection, claimLocked } from "../mongodb.mts"
 
 export const subscribeToChannels = async (
@@ -38,7 +38,11 @@ export const subscribeToChannels = async (
     await channelCollection.updateOne(
       { _id },
       {
-        $set: { ...(lastRequestedAt && { lastRequestedAt }), lockedAt: null },
+        $set: {
+          ...(lastRequestedAt && { lastRequestedAt }),
+          callbackUrl,
+          lockedAt: null,
+        },
         $max: {
           nextAttemptAt: dayjs().add(minutesToNextAttempt, "m").toDate(),
         },
