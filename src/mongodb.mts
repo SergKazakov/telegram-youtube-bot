@@ -34,7 +34,7 @@ export type ChannelSchema = {
 }
 
 export const DEFAULT_CHANNEL: Omit<ChannelSchema, "_id"> = {
-  callbackUrl: `${env.PUBLIC_URL}/pubsubhubbub`,
+  callbackUrl,
   nextAttemptAt: new Date(0),
   lastRequestedAt: null,
   lastConfirmedAt: null,
@@ -81,6 +81,8 @@ export const setupDatabase = async () => {
   await deliveryCollection.createIndexes([
     { key: { status: 1, nextAttemptAt: 1, lockedAt: 1 } },
   ])
+
+  await subscriptionCollection.createIndexes([{ key: { "_id.channelId": 1 } }])
 
   await channelCollection.updateMany(
     { callbackUrl: { $ne: callbackUrl } },

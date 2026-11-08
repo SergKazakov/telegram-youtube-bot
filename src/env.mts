@@ -2,6 +2,10 @@ import { cleanEnv, num, port, str, url } from "envalid"
 
 export const env = cleanEnv(Bun.env, {
   BOT_TOKEN: str({ testDefault: "" }),
+  CRON_TASK_TO_CLEANUP_ORPHAN_CHANNELS: str({ default: "0 */12 * * *" }),
+  CRON_TASK_TO_DELIVER: str({ default: "* * * * *" }),
+  CRON_TASK_TO_POLL_CHANNELS: str({ default: "" }),
+  CRON_TASK_TO_SUBSCRIBE_TO_CHANNELS: str({ default: "*/5 * * * *" }),
   DAYS_TO_IGNORE_VIDEO: num({ default: 1 }),
   DAYS_TO_RESUBSCRIBE: num({ default: 1 }),
   FEED_TIMEOUT: num({ default: 30_000 }),

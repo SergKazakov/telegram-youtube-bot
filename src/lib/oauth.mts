@@ -52,15 +52,11 @@ export const verifyState = (state: string) => {
 
   const [chatId, ts, signature] = decoded.split(".", 3)
 
-  if (
-    !chatId
-    || !ts
-    || !signature
-    || !safeEqual(signature, createHmac(`${chatId}.${ts}`, env.OAUTH_SECRET))
-    || dayjs().diff(Number(ts), "m") > env.MINUTES_TO_EXPIRE_STATE
-  ) {
-    return null
-  }
-
   return chatId
+    && ts
+    && signature
+    && safeEqual(signature, createHmac(`${chatId}.${ts}`, env.OAUTH_SECRET))
+    && dayjs().diff(Number(ts), "m") <= env.MINUTES_TO_EXPIRE_STATE
+    ? chatId
+    : null
 }

@@ -112,12 +112,14 @@ export const deliver = async () => {
     }
   }
 
-  if (blockedChatIds.size > 0) {
-    const ids = [...blockedChatIds]
-
-    await Promise.all([
-      chatCollection.deleteMany({ _id: { $in: ids } }),
-      subscriptionCollection.deleteMany({ "_id.chatId": { $in: ids } }),
-    ])
+  if (blockedChatIds.size === 0) {
+    return
   }
+
+  const ids = [...blockedChatIds]
+
+  await Promise.all([
+    chatCollection.deleteMany({ _id: { $in: ids } }),
+    subscriptionCollection.deleteMany({ "_id.chatId": { $in: ids } }),
+  ])
 }

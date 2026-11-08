@@ -8,20 +8,16 @@ import {
   expectCounts,
 } from "../testUtils/index.mts"
 
-const createFeed = ({
-  links,
-  published = new Date(),
-}: { links?: string[]; published?: Date | null } = {}) => /* HTML */ `
+const createFeed = () => /* HTML */ `
   <feed>
     <entry>
       <yt:videoId>videoId</yt:videoId>
       <yt:channelId>channelId</yt:channelId>
       <title>title</title>
-      ${links ? links.map(it => `<link href="${it}"/>`).join("") : ""}
       <author>
         <name>name</name>
       </author>
-      ${published ? `<published>${published.toISOString()}</published>` : ""}
+      <published>${new Date().toISOString()}</published>
     </entry>
   </feed>
 `

@@ -18,21 +18,17 @@ import {
 import { pollChannels } from "./pollChannels.mts"
 
 const createEntry = ({
-  channelId = "channelId",
-  videoId = "videoId",
   links,
   published = new Date().toISOString(),
 }: Partial<{
-  channelId: string
-  videoId: string
   links: { "@href": string }[]
   published: string | null
 }> = {}) => [
   {
     ...(links && { link: links }),
     ...(published && { published }),
-    "yt:videoId": videoId,
-    "yt:channelId": channelId,
+    "yt:videoId": "videoId",
+    "yt:channelId": "channelId",
     title: "title",
     author: { name: "name" },
   },
