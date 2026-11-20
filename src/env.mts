@@ -1,29 +1,46 @@
-import { cleanEnv, num, port, str, url } from "envalid"
+import {
+  applyDefaultMiddleware,
+  customCleanEnv,
+  num,
+  port,
+  str,
+  url,
+} from "envalid"
 
-export const env = cleanEnv(Bun.env, {
-  BOT_TOKEN: str({ testDefault: "" }),
-  CRON_TASK_TO_CLEANUP_ORPHAN_CHANNELS: str({ default: "0 */12 * * *" }),
-  CRON_TASK_TO_DELIVER: str({ default: "* * * * *" }),
-  CRON_TASK_TO_POLL_CHANNELS: str({ default: "" }),
-  CRON_TASK_TO_SUBSCRIBE_TO_CHANNELS: str({ default: "*/5 * * * *" }),
-  DAYS_TO_IGNORE_VIDEO: num({ default: 1 }),
-  DAYS_TO_RESUBSCRIBE: num({ default: 1 }),
-  FEED_TIMEOUT: num({ default: 30_000 }),
-  GOOGLE_CLIENT_ID: str({ testDefault: "" }),
-  GOOGLE_CLIENT_SECRET: str({ testDefault: "" }),
-  HUB_SECRET: str({ testDefault: "foo" }),
-  HUB_TIMEOUT: num({ default: 30_000 }),
-  MAX_ATTEMPTS_TO_DELIVER: num({ default: 5 }),
-  MINUTES_TO_CACHE_TOKEN: num({ default: 5 }),
-  MINUTES_TO_CONFIRM_SUBSCRIPTION: num({ default: 30 }),
-  MINUTES_TO_EXPIRE_STATE: num({ default: 10 }),
-  MINUTES_TO_RETRY_SUBSCRIPTION: num({ default: 30 }),
-  MINUTES_TO_STALE_LOCK: num({ default: 5 }),
-  MONGODB_URL: url({
-    default: "mongodb://localhost:27017/telegram-youtube-bot",
+export const env = customCleanEnv(
+  Bun.env,
+  {
+    BOT_TOKEN: str({ testDefault: "" }),
+    CRON_TASK_TO_CLEANUP_ORPHAN_CHANNELS: str({ default: "0 */12 * * *" }),
+    CRON_TASK_TO_DELIVER: str({ default: "* * * * *" }),
+    CRON_TASK_TO_POLL_CHANNELS: str({ default: "" }),
+    CRON_TASK_TO_SUBSCRIBE_TO_CHANNELS: str({ default: "*/5 * * * *" }),
+    DAYS_TO_IGNORE_VIDEO: num({ default: 1 }),
+    DAYS_TO_RESUBSCRIBE: num({ default: 1 }),
+    DOMAIN: str({ default: "localhost" }),
+    FEED_TIMEOUT: num({ default: 30_000 }),
+    GOOGLE_CLIENT_ID: str({ testDefault: "" }),
+    GOOGLE_CLIENT_SECRET: str({ testDefault: "" }),
+    HUB_SECRET: str({ testDefault: "foo" }),
+    HUB_TIMEOUT: num({ default: 30_000 }),
+    MAX_ATTEMPTS_TO_DELIVER: num({ default: 5 }),
+    MINUTES_TO_CACHE_TOKEN: num({ default: 5 }),
+    MINUTES_TO_CONFIRM_SUBSCRIPTION: num({ default: 30 }),
+    MINUTES_TO_EXPIRE_STATE: num({ default: 10 }),
+    MINUTES_TO_RETRY_SUBSCRIPTION: num({ default: 30 }),
+    MINUTES_TO_STALE_LOCK: num({ default: 5 }),
+    MONGODB_URL: url({
+      default: "mongodb://localhost:27017/telegram-youtube-bot",
+    }),
+    OAUTH_SECRET: str({ testDefault: "foo" }),
+    PORT: port({ default: 4444 }),
+    THUMBNAIL_TIMEOUT: num({ default: 5000 }),
+  },
+  (cleaned, ...rest) => ({
+    ...applyDefaultMiddleware(cleaned, ...rest),
+    PUBLIC_URL:
+      cleaned.DOMAIN === "localhost"
+        ? `http://localhost:${cleaned.PORT}`
+        : `https://${cleaned.DOMAIN}`,
   }),
-  OAUTH_SECRET: str({ testDefault: "foo" }),
-  PORT: port({ default: 4444 }),
-  PUBLIC_URL: url({ default: "http://localhost:4444" }),
-  THUMBNAIL_TIMEOUT: num({ default: 5000 }),
-})
+)

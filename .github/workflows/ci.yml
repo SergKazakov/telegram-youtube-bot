@@ -1,5 +1,8 @@
 name: CI
 
+env:
+  APP_NAME: ${{ github.event.repository.name }}
+
 on:
   push:
     branches: [master]
@@ -22,7 +25,7 @@ jobs:
           name: artifacts
           path: |
             cli
-            telegram-youtube-bot.service
+            ${{ env.APP_NAME }}.service
 
   deploy:
     needs: ci
@@ -31,6 +34,13 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: artifacts
+      - uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          source: "cli,${{ env.APP_NAME }}.service"
+          target: /tmp
       - uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -39,24 +49,20 @@ jobs:
           script: |
             set -e
             mkdir -p ${{ secrets.APP_DIR }}
-      - uses: appleboy/scp-action@v1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          source: "cli,telegram-youtube-bot.service"
-          target: ${{ secrets.APP_DIR }}
-      - uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            set -e
+            mv /tmp/{cli,${{ env.APP_NAME }}.service} "${{ secrets.APP_DIR }}/"
             cd ${{ secrets.APP_DIR }}
             echo '${{ secrets.ENV_FILE }}' > .env
+            . .env
+            cat > /tmp/Caddyfile <<EOF
+            ${DOMAIN} {
+              reverse_proxy localhost:${PORT}
+            }
+            EOF
+            caddy validate --config /tmp/Caddyfile
+            cp /tmp/Caddyfile /etc/caddy/Caddyfile
+            systemctl reload caddy
             chmod +x cli
-            cp telegram-youtube-bot.service /etc/systemd/system/
+            cp ${{ env.APP_NAME }}.service /etc/systemd/system/
             systemctl daemon-reload
-            systemctl enable telegram-youtube-bot
-            systemctl restart telegram-youtube-bot
+            systemctl enable ${{ env.APP_NAME }}
+            systemctl restart ${{ env.APP_NAME }}
