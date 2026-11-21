@@ -147,7 +147,7 @@ export const pollChannels = async (
     } catch (error) {
       console.error(
         `Failed to poll channel ${it._id}:`,
-        error instanceof Error ? error.message : error,
+        Error.isError(error) ? error.message : error,
       )
     }
   }

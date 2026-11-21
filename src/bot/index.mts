@@ -12,6 +12,8 @@ import { requireAuth } from "./requireAuth.mts"
 import { subscribe } from "./subscribe.mts"
 
 export const bot = new Telegraf(env.BOT_TOKEN)
+  // eslint-disable-next-line unicorn/prefer-await, unicorn/prefer-top-level-await
+  .catch(error => console.error(Error.isError(error) ? error.message : error))
   .use(async (ctx, next) => {
     try {
       await next()
@@ -28,6 +30,4 @@ export const bot = new Telegraf(env.BOT_TOKEN)
   .action(/^updateChannelList:(.*)$/, updateChannelList)
   .action(/^openChannel:(.+)$/, openChannel)
 
-export const startBot = async () => {
-  await bot.launch({ allowedUpdates: [] })
-}
+export const startBot = () => bot.launch({ allowedUpdates: [] })

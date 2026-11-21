@@ -29,7 +29,7 @@ export const subscribeToChannels = async (
     } catch (error) {
       console.error(
         `Failed to subscribe to ${_id}:`,
-        error instanceof Error ? error.message : error,
+        Error.isError(error) ? error.message : error,
       )
 
       minutesToNextAttempt = env.MINUTES_TO_RETRY_SUBSCRIPTION

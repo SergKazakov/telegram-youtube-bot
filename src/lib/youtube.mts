@@ -86,7 +86,7 @@ export const isRefreshTokenValid = async (client: YoutubeClient) => {
 
     return true
   } catch (error) {
-    if (error instanceof Error && error.message === "invalid_grant") {
+    if (Error.isError(error) && error.message === "invalid_grant") {
       return false
     }
 
